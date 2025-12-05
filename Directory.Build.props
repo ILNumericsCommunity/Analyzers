@@ -4,14 +4,14 @@
         <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
             <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA"/>
         </Exec>
-		<PropertyGroup>
-			<MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
-			<MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
-			<MinVerBuildMetadata Condition=" '$(Configuration)' == 'Debug' ">$(GitSHA)</MinVerBuildMetadata>
+	</Target>
+	<PropertyGroup>
+		<MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
+		<MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+		<MinVerBuildMetadata Condition=" '$(Configuration)' == 'Debug' ">$(GitSHA)</MinVerBuildMetadata>
       <MinVerVerbosity>normal</MinVerVerbosity>
       <MinVerTagPrefix>v</MinVerTagPrefix>
-    </PropertyGroup>
-  </Target>
+	</PropertyGroup>
 	<Target Name="Versioning" AfterTargets="MinVer">
 		<PropertyGroup>
 			<BuildNumber>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::Parse("2025/12/01"))).TotalDays.ToString("0"))</BuildNumber>
