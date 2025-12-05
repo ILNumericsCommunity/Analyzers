@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <RootNamespace>ILNumerics.Community.Analyzers</RootNamespace>
+    <AssemblyName>ILNumerics.Community.Analyzers</AssemblyName>
+    <PackageId>ILNumerics.Community.Analyzers</PackageId>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Analyzers.Analyzers\Analyzers.Analyzers.csproj" />
+    <ProjectReference Include="..\Analyzers.CodeFixes\Analyzers.CodeFixes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Analyzers.Analyzers\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.Analyzers.dll"
+          Pack="true" PackagePath="analyzers/dotnet/cs" />
+    <None Include="..\Analyzers.CodeFixes\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.CodeFixes.dll"
+          Pack="true" PackagePath="analyzers/dotnet/cs" />
+  </ItemGroup>
+</Project>

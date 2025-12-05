@@ -1,0 +1,11 @@
+<Solution>
+  <Project Path="Analyzers.Analyzers/Analyzers.Analyzers.csproj">
+    <Build Project="false" />
+  </Project>
+  <Project Path="Analyzers.CodeFixes/Analyzers.CodeFixes.csproj">
+    <Build Project="false" />
+  </Project>
+  <Project Path="Analyzers/Analyzers.csproj" />
+  <Project Path="Analyzers.Tests/Analyzers.Tests.csproj" />
+  <Project Path="Playground/Playground.csproj" />
+</Solution>
