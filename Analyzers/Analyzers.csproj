@@ -1,13 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ILNumerics.Community.Analyzers</RootNamespace>
     <AssemblyName>ILNumerics.Community.Analyzers</AssemblyName>
     <PackageId>ILNumerics.Community.Analyzers</PackageId>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
+    <PackageType>Analyzer</PackageType>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Analyzers.Analyzers\Analyzers.Analyzers.csproj" PrivateAssets="all" />
@@ -19,10 +28,4 @@
     <None Include="..\Analyzers.CodeFixes\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MinVer" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
 </Project>
