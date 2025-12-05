@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Analyzers.Analyzers\Analyzers.Analyzers.csproj" />
-    <ProjectReference Include="..\Analyzers.CodeFixes\Analyzers.CodeFixes.csproj" />
+    <ProjectReference Include="..\Analyzers.Analyzers\Analyzers.Analyzers.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Analyzers.CodeFixes\Analyzers.CodeFixes.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
