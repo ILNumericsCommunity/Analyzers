@@ -15,9 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Analyzers.Analyzers\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.Analyzers.dll"
-          Pack="true" PackagePath="analyzers/dotnet/cs" />
-    <None Include="..\Analyzers.CodeFixes\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.CodeFixes.dll"
-          Pack="true" PackagePath="analyzers/dotnet/cs" />
+    <None Include="..\Analyzers.Analyzers\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+    <None Include="..\Analyzers.CodeFixes\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
