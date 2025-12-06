@@ -1,6 +1,4 @@
 <Solution>
-  <Project Path="Analyzers.Analyzers/Analyzers.Analyzers.csproj" />
-  <Project Path="Analyzers.CodeFixes/Analyzers.CodeFixes.csproj" />
   <Project Path="Analyzers/Analyzers.csproj" />
   <Project Path="Analyzers.Tests/Analyzers.Tests.csproj" />
   <Project Path="Playground/Playground.csproj">

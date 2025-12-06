@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace ILNumerics.Community.Analyzers.Analyzers;
+namespace ILNumerics.Community.Analyzers;
 
 internal static class IlnTypes
 {

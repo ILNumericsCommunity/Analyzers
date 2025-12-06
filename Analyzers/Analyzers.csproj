@@ -4,14 +4,21 @@
     <RootNamespace>ILNumerics.Community.Analyzers</RootNamespace>
     <AssemblyName>ILNumerics.Community.Analyzers</AssemblyName>
     <PackageId>ILNumerics.Community.Analyzers</PackageId>
+    <PackageType>Analyzer</PackageType>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
-    <PackageType>Analyzer</PackageType>
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>RS1038;RS2008;NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="5.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="5.0.0" PrivateAssets="all" />
     <PackageReference Include="MinVer" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -19,13 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Analyzers.Analyzers\Analyzers.Analyzers.csproj" PrivateAssets="all" />
-    <ProjectReference Include="..\Analyzers.CodeFixes\Analyzers.CodeFixes.csproj" PrivateAssets="all" />
+    <None Include="$(TargetPath)" Pack="true" PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\Analyzers.Analyzers\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
-    <None Include="..\Analyzers.CodeFixes\bin\$(Configuration)\netstandard2.0\ILNumerics.Community.Analyzers.CodeFixes.dll" Pack="true" PackagePath="analyzers/dotnet/cs" />
-  </ItemGroup>
-
 </Project>

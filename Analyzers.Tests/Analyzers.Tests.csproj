@@ -20,7 +20,6 @@
     <PackageReference Include="xunit" Version="2.9.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Analyzers.Analyzers\Analyzers.Analyzers.csproj" />
-    <ProjectReference Include="..\Analyzers.CodeFixes\Analyzers.CodeFixes.csproj" />
+    <ProjectReference Include="..\Analyzers\Analyzers.csproj" />
   </ItemGroup>
 </Project>
