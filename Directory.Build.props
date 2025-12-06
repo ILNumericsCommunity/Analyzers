@@ -1,28 +1,28 @@
 <Project>
-	<!-- GitInfo (SemVer) -->
-	<Target Name="GitInfo">
-        <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
-            <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA"/>
-        </Exec>
-	</Target>
-	<PropertyGroup>
-		<MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
-		<MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
-		<MinVerBuildMetadata Condition=" '$(Configuration)' == 'Debug' ">$(GitSHA)</MinVerBuildMetadata>
-      <MinVerVerbosity>normal</MinVerVerbosity>
-      <MinVerTagPrefix>v</MinVerTagPrefix>
-	</PropertyGroup>
-	<Target Name="Versioning" AfterTargets="MinVer">
-		<PropertyGroup>
-			<BuildNumber>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::Parse("2025/12/01"))).TotalDays.ToString("0"))</BuildNumber>
+  <!-- GitInfo (SemVer) -->
+  <Target Name="GitInfo">
+    <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA"/>
+    </Exec>
+  </Target>
+  <PropertyGroup>
+    <MinVerMinimumMajorMinor>7.0</MinVerMinimumMajorMinor>
+    <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+    <MinVerBuildMetadata Condition=" '$(Configuration)' == 'Debug' ">$(GitSHA)</MinVerBuildMetadata>
+    <MinVerVerbosity>normal</MinVerVerbosity>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+  <Target Name="Versioning" AfterTargets="MinVer">
+    <PropertyGroup>
+      <BuildNumber>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::Parse("2025/11/01"))).TotalDays.ToString("0"))</BuildNumber>
       <Version>$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).$(BuildNumber)-dev+$(GitSHA)</Version>
       <Version Condition=" '$(Configuration)' == 'Release' ">$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).$(BuildNumber)</Version>
       <PackageVersion>$(Version)</PackageVersion>
-		</PropertyGroup>
-		<Message Text="Version: $(Version)" Importance="high"/>
-		<Message Text="FileVersion: $(FileVersion)" Importance="high"/>
-		<Message Text="AssemblyVersion: $(AssemblyVersion)" Importance="high"/>
-	</Target>
+    </PropertyGroup>
+    <Message Text="Version: $(Version)" Importance="high"/>
+    <Message Text="FileVersion: $(FileVersion)" Importance="high"/>
+    <Message Text="AssemblyVersion: $(AssemblyVersion)" Importance="high"/>
+  </Target>
 	<!-- Project Defaults  -->
 	<PropertyGroup>
 		<LangVersion>13.0</LangVersion>
@@ -42,7 +42,7 @@
 		<Company></Company>
 		<Copyright>Copyright &#169; Thilo Viereck &amp; ILNumerics Community 2025-$([System.DateTime]::Now.ToString(`yyyy`))</Copyright>
 		<DefaultLanguage>en-US</DefaultLanguage>
-		<!--<PackageIcon>logo.png</PackageIcon>-->
+		<PackageIcon>Icon.png</PackageIcon>
 		<PackageReadmeFile>Readme.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/ILNumericsCommunity/Analyzers</PackageProjectUrl>
@@ -60,7 +60,7 @@
 	</PropertyGroup>
 	<!-- NuGet Assets -->
 	<ItemGroup>
-    <!-- <None Include="$(SolutionDir)\logo.png" Pack="true" Visible="false" PackagePath="" /> -->
+    <None Include="$(SolutionDir)\Icon.png" Pack="true" Visible="false" PackagePath="" /> 
     <None Include="$(SolutionDir)\Readme.md" Pack="true" Visible="false" PackagePath="Readme.md" />
   </ItemGroup>
 </Project>
