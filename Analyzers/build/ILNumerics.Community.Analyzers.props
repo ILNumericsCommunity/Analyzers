@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <!-- Override PrivateAssets to avoid transitive references in downstream projects -->
+    <PackageReference Update="ILNumerics.Community.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
+</Project>
