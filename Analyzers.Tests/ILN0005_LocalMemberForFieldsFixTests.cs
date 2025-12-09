@@ -89,4 +89,43 @@ public sealed class ClassWithArrayField {
         await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, ILN0005_LocalMemberForFieldsFix>.Test { TestCode = test, FixedCode = fixedCode }
             .RunAsync();
     }
+
+    [Fact]
+    public async Task Fixes_Field_LocalMember_And_Assignment()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class ClassWithArrayField {
+    private Array<double> {|ILN0005:_A|};
+
+    public ClassWithArrayField(InArray<double> x) {
+        {|ILN0005A:_A|} = check(x);
+    }
+}
+";
+
+        var fixedCode = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class ClassWithArrayField {
+    private readonly Array<double> _A = localMember<double>();
+
+    public ClassWithArrayField(InArray<double> x) {
+        _A.a = check(x);
+    }
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, ILN0005_LocalMemberForFieldsFix>.Test
+            {
+                TestCode = test,
+                FixedCode = fixedCode,
+                NumberOfFixAllIterations = 2,
+                NumberOfIncrementalIterations = 2
+        }
+            .RunAsync();
+    }
 }

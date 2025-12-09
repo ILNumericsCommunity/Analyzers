@@ -14,7 +14,7 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
                                                            "ILNumerics fields should use localMember<T>() pattern",
                                                            "Field '{0}' of type '{1}' should be initialized via localMember<T>()",
                                                            "ILNumerics",
-                                                           DiagnosticSeverity.Warning,
+                                                           DiagnosticSeverity.Info,
                                                            true);
 
     public static readonly DiagnosticDescriptor AssignRule = new("ILN0005A",
@@ -75,8 +75,7 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
         }
 
         // No initializer: we can still flag.
-        ctx.ReportDiagnostic(Diagnostic.Create(Rule, syntax?.GetLocation() ?? field.Locations[0], field.Name,
-                                               t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+        ctx.ReportDiagnostic(Diagnostic.Create(Rule, syntax?.GetLocation() ?? field.Locations[0], field.Name, t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
     }
 
     private static void AnalyzeAssignment(OperationAnalysisContext ctx)
