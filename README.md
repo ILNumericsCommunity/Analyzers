@@ -35,6 +35,10 @@ dotnet add package ILNumerics.Community.Analyzers
   
   ILNumerics discourages C# `ref`/`out` parameters for its array types. Instead of `ref Array<T>` or `out Array<T>`, APIs should use `OutArray<T>` (or the appropriate flavor) and pass arrays in the ILNumerics way. This keeps ownership and reuse semantics consistent and avoids clashes between C# reference semantics and ILNumerics' buffer management model.
 
+- **ILN0005 — ILNumerics fields should use `localMember<T>()` and safe assignment**
+
+  Instance fields of ILNumerics `Array<T>` types are treated as local members: they should be initialized via `localMember<T>()`. `ILN0005` flags non‑static `Array<T>` fields that either have no initializer or use something other than `localMember<T>()`. Valid writes to fields must use either `_A.a = ...` or `_A.Assign(...)`, which keeps the field buffer stable following expected lifetime conventions.
+
 ### Troubleshooting
 
 No squiggles but lightbulb available: enable live analysis in the IDE (VS: Tools → Options → Text Editor → C# → Advanced → Enable .NET analyzers, Full solution analysis) and ensure `.editorconfig` does not suppress diagnostics.

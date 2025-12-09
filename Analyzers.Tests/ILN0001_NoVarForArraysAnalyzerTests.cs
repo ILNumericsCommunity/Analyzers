@@ -16,16 +16,9 @@ using static ILNumerics.ILMath;
 
 class C {
     void M() {
-        var [|x|] = zeros<double>(3,4);
+        [|var|] [|x = zeros<double>(3,4)|];
     }
 }";
-        await new CSharpVerifier<ILN0001_NoVarForArraysAnalyzer, ILN0001_NoVarForArraysFix>.Test
-        {
-            TestCode = test,
-            ExpectedDiagnostics =
-            {
-                CSharpVerifier<ILN0001_NoVarForArraysAnalyzer, ILN0001_NoVarForArraysFix>.Diagnostic("ILN0001").WithSpan(8, 13, 8, 14)
-            }
-        }.RunAsync();
+        await new CSharpVerifier<ILN0001_NoVarForArraysAnalyzer, ILN0001_NoVarForArraysFix>.Test { TestCode = test }.RunAsync();
     }
 }

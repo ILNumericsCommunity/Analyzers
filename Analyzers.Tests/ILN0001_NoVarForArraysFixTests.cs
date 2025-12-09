@@ -16,7 +16,7 @@ using static ILNumerics.ILMath;
 
 class C {
     void M() {
-        var [|x|] = zeros<double>(3,4);
+        [|var|] [|x = zeros<double>(3,4)|];
     }
 }";
         var fixedCode = @"

@@ -1,7 +1,9 @@
+using System.Linq;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ILNumerics.Community.Analyzers.Analyzers;
 
@@ -32,7 +34,24 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
     {
         var f = (IFieldSymbol) ctx.Symbol;
         if (f.Type is INamedTypeSymbol t && (IlnTypes.IsIlnIn(t) || IlnTypes.IsIlnOut(t) || IlnTypes.IsIlnRet(t)))
-            ctx.ReportDiagnostic(Diagnostic.Create(Rule, f.Locations[0], t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+        {
+            var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+
+            // Report on the field identifier
+            ctx.ReportDiagnostic(Diagnostic.Create(Rule, f.Locations[0], typeName));
+
+            // Also report on the field type syntax, e.g. InArray<double>
+            var syntaxRef = f.DeclaringSyntaxReferences.FirstOrDefault();
+            if (syntaxRef != null)
+            {
+                var syntax = syntaxRef.GetSyntax(ctx.CancellationToken);
+                if (syntax is VariableDeclaratorSyntax variable &&
+                    variable.Parent is VariableDeclarationSyntax declaration)
+                {
+                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, declaration.Type.GetLocation(), typeName));
+                }
+            }
+        }
     }
 
     private static void AnalyzeProperty(SymbolAnalysisContext ctx)
@@ -57,7 +76,21 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
                 return;
 
             // All other cases (including Out*, any Ret* with a setter, any In* with getter that is not init-only) are reported
-            ctx.ReportDiagnostic(Diagnostic.Create(Rule, p.Locations[0], t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+            var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+
+            // Report on the property identifier
+            ctx.ReportDiagnostic(Diagnostic.Create(Rule, p.Locations[0], typeName));
+
+            // Also report on the property type syntax, e.g. OutArray<double>
+            var syntaxRef = p.DeclaringSyntaxReferences.FirstOrDefault();
+            if (syntaxRef != null)
+            {
+                var syntax = syntaxRef.GetSyntax(ctx.CancellationToken);
+                if (syntax is PropertyDeclarationSyntax property)
+                {
+                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, property.Type.GetLocation(), typeName));
+                }
+            }
         }
     }
 
@@ -69,7 +102,18 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
             foreach (var v in decl.Declarators)
             {
                 if (v.Symbol?.Type is INamedTypeSymbol t && (IlnTypes.IsIlnIn(t) || IlnTypes.IsIlnOut(t) || IlnTypes.IsIlnRet(t)))
-                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, v.Syntax.GetLocation(), t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+                {
+                    var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+
+                    // Report on the local identifier
+                    ctx.ReportDiagnostic(Diagnostic.Create(Rule, v.Syntax.GetLocation(), typeName));
+
+                    // Also report on the local type syntax, e.g. RetArray<double>
+                    if (decl.Syntax is VariableDeclarationSyntax declaration)
+                    {
+                        ctx.ReportDiagnostic(Diagnostic.Create(Rule, declaration.Type.GetLocation(), typeName));
+                    }
+                }
             }
         }
     }

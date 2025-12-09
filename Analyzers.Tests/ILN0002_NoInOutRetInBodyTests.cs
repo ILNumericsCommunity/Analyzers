@@ -15,23 +15,14 @@ using static ILNumerics.ILMath;
 
 class C {
     // field
-    [|InArray<double>|] myField;
+    [|InArray<double>|] [|myField|];
     // property
-    [|OutArray<double>|] MyProperty { get; set; }
+    [|OutArray<double>|] [|MyProperty|] { get; set; }
     void M() {
         // local
-        [|RetArray<double>|] localVar = null;
+        [|RetArray<double>|] [|localVar = null|];
     }
 }";
-        await new CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Test
-        {
-            TestCode = test,
-            ExpectedDiagnostics =
-            {
-                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(7, 6, 7, 22),
-                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(9, 6, 9, 23),
-                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(12, 9, 12, 24)
-            }
-        }.RunAsync();
+        await new CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
     }
 }

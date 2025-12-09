@@ -12,16 +12,18 @@ public class ILN0005_LocalMemberForFieldsFixTests
     {
         var test = @"
 using ILNumerics;
+using static ILNumerics.ILMath;
 
-public sealed class C {
-    private Array<double> [|_A|];
+public sealed class ClassWithArrayField {
+    private Array<double> {|ILN0005:_A|};
 }
 ";
 
         var fixedCode = @"
 using ILNumerics;
+using static ILNumerics.ILMath;
 
-public sealed class C {
+public sealed class ClassWithArrayField {
     private readonly Array<double> _A = localMember<double>();
 }
 ";
@@ -35,17 +37,52 @@ public sealed class C {
     {
         var test = @"
 using ILNumerics;
+using static ILNumerics.ILMath;
 
-public sealed class C<T> {
-    public Array<T> [|_A|];
+public sealed class ClassWithArrayField<T> {
+    public Array<T> {|ILN0005:_A|};
 }
 ";
 
         var fixedCode = @"
 using ILNumerics;
+using static ILNumerics.ILMath;
 
-public sealed class C<T> {
+public sealed class ClassWithArrayField<T> {
     public readonly Array<T> _A = localMember<T>();
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, ILN0005_LocalMemberForFieldsFix>.Test { TestCode = test, FixedCode = fixedCode }
+            .RunAsync();
+    }
+
+    [Fact]
+    public async Task Rewrites_Field_Assignment_To_DotA()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class ClassWithArrayField {
+    private readonly Array<double> _A = localMember<double>();
+
+    public ClassWithArrayField(InArray<double> x) {
+        {|ILN0005A:_A|} = check(x);
+    }
+}
+";
+
+        var fixedCode = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class ClassWithArrayField {
+    private readonly Array<double> _A = localMember<double>();
+
+    public ClassWithArrayField(InArray<double> x) {
+        _A.a = check(x);
+    }
 }
 ";
 

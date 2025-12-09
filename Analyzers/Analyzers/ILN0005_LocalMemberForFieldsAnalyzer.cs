@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace ILNumerics.Community.Analyzers.Analyzers;
 
@@ -17,7 +17,14 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
                                                            DiagnosticSeverity.Warning,
                                                            true);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
+    public static readonly DiagnosticDescriptor AssignRule = new("ILN0005A",
+                                                                 "ILNumerics fields should be assigned via '.a' or Assign()",
+                                                                 "Field '{0}' should be assigned via '{0}.a = ...' or '{0}.Assign(...)'",
+                                                                 "ILNumerics",
+                                                                 DiagnosticSeverity.Warning,
+                                                                 true);
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule, AssignRule];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -26,6 +33,10 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
 
         // Check field declarations for the required localMember<T>() initialization pattern
         context.RegisterSymbolAction(AnalyzeField, SymbolKind.Field);
+
+        // Track assignments and method calls that may write to ILNumerics Array<T> fields
+        context.RegisterOperationAction(AnalyzeAssignment, OperationKind.SimpleAssignment, OperationKind.CompoundAssignment);
+        context.RegisterOperationAction(AnalyzeInvocation, OperationKind.Invocation);
     }
 
     private static void AnalyzeField(SymbolAnalysisContext ctx)
@@ -46,13 +57,14 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
             return;
 
         var syntax = declSyntaxRef.GetSyntax(ctx.CancellationToken) as VariableDeclaratorSyntax;
-        if (syntax?.Initializer is { } init)
+        var initializer = syntax?.Initializer;
+        if (syntax != null && initializer != null)
         {
-            if (init.Value is InvocationExpressionSyntax invocation &&
+            if (initializer.Value is InvocationExpressionSyntax invocation &&
                 invocation.Expression is GenericNameSyntax gName &&
                 gName.Identifier.Text == "localMember")
             {
-                // Pattern already followed; do not report.
+                // Pattern already followed (do not report).
                 return;
             }
 
@@ -63,6 +75,42 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
         }
 
         // No initializer: we can still flag.
-        ctx.ReportDiagnostic(Diagnostic.Create(Rule, syntax?.GetLocation() ?? field.Locations[0], field.Name, t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+        ctx.ReportDiagnostic(Diagnostic.Create(Rule, syntax?.GetLocation() ?? field.Locations[0], field.Name,
+                                               t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+    }
+
+    private static void AnalyzeAssignment(OperationAnalysisContext ctx)
+    {
+        var op = (IAssignmentOperation) ctx.Operation;
+        var target = op.Target;
+
+        // Allow pattern: _A.a = ...
+        if (target is IPropertyReferenceOperation propRef &&
+            propRef.Instance is IFieldReferenceOperation fieldPropRef &&
+            IsIlnArrayField(fieldPropRef.Field) &&
+            propRef.Property.Name == "a")
+            return;
+
+        // If assignment goes directly to the field, flag it
+        if (target is IFieldReferenceOperation fieldRef && IsIlnArrayField(fieldRef.Field))
+            ctx.ReportDiagnostic(Diagnostic.Create(AssignRule, target.Syntax.GetLocation(), fieldRef.Field.Name));
+    }
+
+    private static void AnalyzeInvocation(OperationAnalysisContext ctx)
+    {
+        var invocation = (IInvocationOperation) ctx.Operation;
+
+        // Allow: _A.Assign(...)
+        if (invocation.Instance is IFieldReferenceOperation fieldRef &&
+            IsIlnArrayField(fieldRef.Field) &&
+            invocation.TargetMethod.Name == "Assign")
+        {
+            return;
+        }
+    }
+
+    private static bool IsIlnArrayField(IFieldSymbol field)
+    {
+        return !field.IsStatic && field.Type is INamedTypeSymbol t && IlnTypes.IsArray(t);
     }
 }
