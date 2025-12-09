@@ -60,16 +60,35 @@ public sealed class ClassWithArrayField {
     }
 
     [Fact]
-    public async Task Flags_Direct_Field_Assignment()
+    public async Task Flags_Direct_Field_Assignment_From_Ctor()
     {
         var test = @"
 using ILNumerics;
 using static ILNumerics.ILMath;
 
 public sealed class ClassWithArrayField {
-    private readonly Array<double> _A = localMember<double>();
+    private Array<double> _A = localMember<double>();
 
     public ClassWithArrayField(InArray<double> x) {
+        {|ILN0005A:_A|} = check(x);
+    }
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, ILN0005_LocalMemberForFieldsFix>.Test { TestCode = test }.RunAsync();
+    }
+
+    [Fact]
+    public async Task Flags_Direct_Field_Assignment_From_Method()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class ClassWithArrayField {
+    private Array<double> _A = localMember<double>();
+
+    public void M(InArray<double> x) {
         {|ILN0005A:_A|} = check(x);
     }
 }

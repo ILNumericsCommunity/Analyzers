@@ -38,6 +38,7 @@ public sealed class ILN0005_LocalMemberForFieldsFix : CodeFixProvider
             if (fieldDecl is null)
                 return;
 
+            // This code fix will also apply the ILN0005A-style .a assignments for this field
             context.RegisterCodeFix(CodeAction.Create("Use localMember<T>() and readonly field",
                                                       ct => ApplyLocalMemberFixAsync(context.Document, fieldDecl, declarator, ct),
                                                       "ILN0005_UseLocalMember"), diagnostic);
@@ -92,26 +93,80 @@ public sealed class ILN0005_LocalMemberForFieldsFix : CodeFixProvider
 
         var newRoot = root.ReplaceNode(fieldDecl, newFieldDecl);
 
-        return document.WithSyntaxRoot(newRoot);
+        // Resolve the field symbol using the original tree before we replace it
+        var semanticModel = await document.GetSemanticModelAsync(ct).ConfigureAwait(false);
+        if (semanticModel is null)
+            return document.WithSyntaxRoot(newRoot);
+
+        var fieldSymbol = semanticModel.GetDeclaredSymbol(declarator, ct) as IFieldSymbol;
+        if (fieldSymbol is null)
+            return document.WithSyntaxRoot(newRoot);
+
+        var newDocument = document.WithSyntaxRoot(newRoot);
+
+        // Reuse the same logic as ILN0005A to rewrite assignments to this field
+        return await RewriteAssignmentsToDotAAsync(newDocument, fieldSymbol, ct).ConfigureAwait(false);
     }
 
-    private static async Task<Document> UseDotAAssignmentAsync(Document document, AssignmentExpressionSyntax assignment, CancellationToken ct)
+    // Rewrite all assignments to the given field symbol to use the .a property (e.g. _A = v -> _A.a = v)
+    private static async Task<Document> RewriteAssignmentsToDotAAsync(Document document, IFieldSymbol fieldSymbol, CancellationToken ct)
     {
         var root = await document.GetSyntaxRootAsync(ct).ConfigureAwait(false);
         if (root is null)
             return document;
 
-        // Replace `_A = value` with `_A.a = value`
-        if (assignment.Left is IdentifierNameSyntax id)
-        {
-            var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, id, SyntaxFactory.Token(SyntaxKind.DotToken),
-                                                                    SyntaxFactory.IdentifierName("a"));
-            var newAssignment = assignment.WithLeft(memberAccess);
-            var newRoot = root.ReplaceNode(assignment, newAssignment);
+        var semanticModel = await document.GetSemanticModelAsync(ct).ConfigureAwait(false);
+        if (semanticModel is null)
+            return document;
 
-            return document.WithSyntaxRoot(newRoot);
+        var assignments = root.DescendantNodes()
+            .OfType<AssignmentExpressionSyntax>()
+            .Where(a =>
+            {
+                if (a.Left is not IdentifierNameSyntax id)
+                    return false;
+
+                var symbol = semanticModel.GetSymbolInfo(id, ct).Symbol;
+                return SymbolEqualityComparer.Default.Equals(symbol, fieldSymbol);
+            })
+            .ToArray();
+
+        if (assignments.Length == 0)
+            return document;
+
+        var newRoot = root;
+
+        foreach (var assignment in assignments)
+        {
+            var id = (IdentifierNameSyntax)assignment.Left;
+
+            var memberAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                id,
+                SyntaxFactory.Token(SyntaxKind.DotToken),
+                SyntaxFactory.IdentifierName("a"));
+
+            var newAssignment = assignment.WithLeft(memberAccess);
+            newRoot = newRoot.ReplaceNode(assignment, newAssignment);
         }
 
-        return document;
+        return document.WithSyntaxRoot(newRoot);
+    }
+
+    private static async Task<Document> UseDotAAssignmentAsync(Document document, AssignmentExpressionSyntax assignment, CancellationToken ct)
+    {
+        // Resolve the field symbol from the left-hand side, then delegate to the shared rewriter
+        var semanticModel = await document.GetSemanticModelAsync(ct).ConfigureAwait(false);
+        if (semanticModel is null)
+            return document;
+
+        if (assignment.Left is not IdentifierNameSyntax id)
+            return document;
+
+        var fieldSymbol = semanticModel.GetSymbolInfo(id, ct).Symbol as IFieldSymbol;
+        if (fieldSymbol is null)
+            return document;
+
+        return await RewriteAssignmentsToDotAAsync(document, fieldSymbol, ct).ConfigureAwait(false);
     }
 }
