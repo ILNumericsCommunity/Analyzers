@@ -18,6 +18,9 @@ internal static class Program
         var d = ILN0003_SignatureFlavor(zeros<double>(2, 2));
 
         ILN0004_NoRefOrOutWithILNumericsArrays(out var e);
+
+        var fieldClass = new ClassWithArrayFields(zeros<double>(2, 2));
+        fieldClass.Update(zeros<double>(2, 1));
     }
 
     // ILN0001: No 'var' for ILNumerics arrays
@@ -53,5 +56,25 @@ internal static class Program
     public static void ILN0004_NoRefOrOutWithILNumericsArrays(out Array<double> outA)
     {
         outA = zeros<double>(3, 4);
+    }
+}
+
+// ILN0005: Enforce localMember<T>() initialization for fields
+// ILN0006: Enforce .a / Assign() for field writes
+internal sealed class ClassWithArrayFields
+{
+    private Array<double> _fieldA;
+    private Array<double> _fieldB = zeros<double>(2, 3);
+
+    public ClassWithArrayFields(InArray<double> inA)
+    {
+        _fieldA = check(inA);
+        _fieldB = ones<double>(3, 4);
+    }
+
+    public void Update(InArray<double> x)
+    {
+        _fieldA = x;
+        _fieldB = x;
     }
 }

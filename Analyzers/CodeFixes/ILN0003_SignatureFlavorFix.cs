@@ -30,7 +30,9 @@ public sealed class ILN0003_SignatureFlavorFix : CodeFixProvider
             // If parameter has 'out' modifier, only offer OutArray<>
             var hasOut = param.Modifiers.Any(m => m.IsKind(SyntaxKind.OutKeyword));
             if (hasOut)
+            {
                 context.RegisterCodeFix(CodeAction.Create("Change parameter to OutArray<>", ct => ParamToOutAsync(context.Document, param, ct), "ILN0003"), diagnostic);
+            }
             else
             {
                 context.RegisterCodeFix(CodeAction.Create("Change parameter to InArray<>", ct => ParamToInAsync(context.Document, param, ct), "ILN0003"), diagnostic);

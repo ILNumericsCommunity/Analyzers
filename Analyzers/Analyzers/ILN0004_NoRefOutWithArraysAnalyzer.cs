@@ -9,7 +9,7 @@ public sealed class ILN0004_NoRefOutWithArraysAnalyzer : DiagnosticAnalyzer
 {
     public static readonly DiagnosticDescriptor Rule = new("ILN0004",
                                                            "Avoid 'out/ref' with IL arrays",
-                                                           "Parameter '{0}' uses '{1}'. Prefer 'OutArray<>' and remove 'out/ref'.",
+                                                           "Parameter '{0}' uses '{1}' (prefer 'OutArray<>' and remove 'out/ref')",
                                                            "ILNumerics",
                                                            DiagnosticSeverity.Warning,
                                                            true);
@@ -20,12 +20,16 @@ public sealed class ILN0004_NoRefOutWithArraysAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+
+        // Inspect parameters to disallow C# ref/out with ILNumerics array types
         context.RegisterSymbolAction(AnalyzeParam, SymbolKind.Parameter);
     }
 
     private static void AnalyzeParam(SymbolAnalysisContext ctx)
     {
         var p = (IParameterSymbol) ctx.Symbol;
+
+        // Only parameters with C# ref/out modifiers are interesting
         if (!p.RefKind.HasFlag(RefKind.Ref) && !p.RefKind.HasFlag(RefKind.Out))
             return;
 

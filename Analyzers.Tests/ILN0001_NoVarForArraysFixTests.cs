@@ -5,10 +5,10 @@ using Xunit;
 
 namespace ILNumerics.Community.Analyzers.Tests;
 
-public class ILN0001_NoVarTests
+public class ILN0001_NoVarForArraysFixTests
 {
     [Fact]
-    public async Task Flags_And_Fixes_Var_For_Array()
+    public async Task Fixes_Var_For_Array_To_Explicit_Array_Type()
     {
         var test = @"
 using ILNumerics;
@@ -28,10 +28,6 @@ class C {
         Array<double> x = zeros<double>(3,4);
     }
 }";
-        await new CSharpVerifier<ILN0001_NoVarForArraysAnalyzer, ILN0001_NoVarForArraysFix>.Test
-        {
-            TestCode = test,
-            FixedCode = fixedCode
-        }.RunAsync();
+        await new CSharpVerifier<ILN0001_NoVarForArraysAnalyzer, ILN0001_NoVarForArraysFix>.Test { TestCode = test, FixedCode = fixedCode }.RunAsync();
     }
 }
