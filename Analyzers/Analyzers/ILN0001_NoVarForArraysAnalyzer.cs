@@ -23,25 +23,27 @@ public sealed class ILN0001_NoVarForArraysAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+
+        // Analyze all local variable declarations
         context.RegisterOperationAction(AnalyzeDeclaration, OperationKind.VariableDeclarationGroup);
     }
 
     private static void AnalyzeDeclaration(OperationAnalysisContext ctx)
     {
-        var group = (IVariableDeclarationGroupOperation)ctx.Operation;
+        var group = (IVariableDeclarationGroupOperation) ctx.Operation;
         foreach (var decl in group.Declarations)
         {
             foreach (var v in decl.Declarators)
             {
                 if (v.Symbol is ILocalSymbol ls)
                 {
-                    // Inspect the syntax of the variable declaration to see if 'var' was used.
+                    // Find out if the declaration actually used the 'var' keyword
                     var declarator = v.Syntax as VariableDeclaratorSyntax;
                     var decleration = declarator?.Parent as VariableDeclarationSyntax;
                     var id = decleration?.Type as IdentifierNameSyntax;
                     var isVar = id is not null && id.Identifier.Text == "var" && id.IsVar;
 
-                    // Base type suggestion based on initializer or local symbol type.
+                    // Try to infer the concrete ILNumerics type from the initializer or the symbol type
                     INamedTypeSymbol? ilnType = null;
                     if (v.Initializer is IVariableInitializerOperation init && init.Value?.Type is INamedTypeSymbol rhsType)
                         ilnType = rhsType;

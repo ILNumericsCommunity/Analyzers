@@ -83,5 +83,8 @@ public sealed class ILN0001_NoVarForArraysFix : CodeFixProvider
         return SyntaxFactory.ParseTypeName(type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
     }
 
-    private static bool Is(INamedTypeSymbol t, string metadataName) => t.MetadataName == metadataName;
+    private static bool Is(INamedTypeSymbol t, string metadataName)
+    {
+        return t.MetadataName == metadataName;
+    }
 }

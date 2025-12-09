@@ -27,6 +27,8 @@ public sealed class ILN0003_SignatureFlavorAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+
+        // Look at method symbols to enforce signature conventions
         context.RegisterSymbolAction(AnalyzeMethod, SymbolKind.Method);
     }
 
@@ -35,22 +37,23 @@ public sealed class ILN0003_SignatureFlavorAnalyzer : DiagnosticAnalyzer
         if (ctx.Symbol is not IMethodSymbol m)
             return;
 
+        // Only analyze ordinary (non-ctor, non-property-accessor) methods
         if (m.MethodKind != MethodKind.Ordinary)
             return;
 
+        // Restrict to public and internal APIs that form the surface area
         if (m.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
             return;
 
-        // Parameters
+        // Parameters: flag plain Array<T> and suggest InArray/OutArray instead
         foreach (var p in m.Parameters)
         {
             if (p.Type is INamedTypeSymbol t && IlnTypes.IsArray(t))
-            {
-                ctx.ReportDiagnostic(Diagnostic.Create(ParamRule, p.Locations[0], p.Name, t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), "InArray<>/OutArray<>"));
-            }
+                ctx.ReportDiagnostic(Diagnostic.Create(ParamRule, p.Locations[0], p.Name, t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
+                                                       "InArray<>/OutArray<>"));
         }
 
-        // Return type
+        // Return type: flag plain Array<T> and suggest RetArray instead
         if (m.ReturnType is INamedTypeSymbol rt && IlnTypes.IsArray(rt))
             ctx.ReportDiagnostic(Diagnostic.Create(ReturnRule, m.Locations[0], rt.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
     }

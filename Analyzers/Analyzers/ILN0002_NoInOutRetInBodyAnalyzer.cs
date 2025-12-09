@@ -10,7 +10,7 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
 {
     public static readonly DiagnosticDescriptor Rule = new("ILN0002",
                                                            "Only In/Out/Ret in method signatures",
-                                                           "Type '{0}' should only appear in method signatures, not in locals/fields/properties",
+                                                           "Type '{0}' should only appear in method signatures (not in locals/fields/properties)",
                                                            "ILNumerics",
                                                            DiagnosticSeverity.Warning,
                                                            true);
@@ -21,6 +21,8 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
+
+        // Inspect fields, properties and local variables for illegal In/Out/Ret usage
         context.RegisterSymbolAction(AnalyzeField, SymbolKind.Field);
         context.RegisterSymbolAction(AnalyzeProperty, SymbolKind.Property);
         context.RegisterOperationAction(AnalyzeLocals, OperationKind.VariableDeclarationGroup);
@@ -38,9 +40,9 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
         var p = (IPropertySymbol) ctx.Symbol;
         if (p.Type is INamedTypeSymbol t && (IlnTypes.IsIlnIn(t) || IlnTypes.IsIlnOut(t) || IlnTypes.IsIlnRet(t)))
         {
-            bool hasGet = p.GetMethod != null;
-            bool hasSet = p.SetMethod != null;
-            bool isInitOnly = p.SetMethod?.IsInitOnly == true; // Roslyn exposes init-only via SetMethod
+            var hasGet = p.GetMethod != null;
+            var hasSet = p.SetMethod != null;
+            var isInitOnly = p.SetMethod?.IsInitOnly == true; // Roslyn exposes init-only via SetMethod
 
             // Allow: get-only properties of Ret*
             if (IlnTypes.IsIlnRet(t) && hasGet && !hasSet)

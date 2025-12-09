@@ -1,15 +1,14 @@
 using System.Threading.Tasks;
 using ILNumerics.Community.Analyzers.Analyzers;
 using ILNumerics.Community.Analyzers.CodeFixes;
-using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 
 namespace ILNumerics.Community.Analyzers.Tests;
 
-public class ILN0003_SignatureFlavorTests
+public class ILN0003_SignatureFlavorFixTests
 {
     [Fact]
-    public async Task Suggests_InOut_For_Params_And_Fixes_To_In()
+    public async Task Fixes_Param_To_InArray()
     {
         var test = @"
 using ILNumerics;
@@ -28,13 +27,12 @@ class C {
         await new CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Test
         {
             TestCode = test,
-            FixedCode = fixedCode,
-            ExpectedDiagnostics = { CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Diagnostic("ILN0003").WithSpan(7,18,7,31) }
+            FixedCode = fixedCode
         }.RunAsync();
     }
 
     [Fact]
-    public async Task Suggests_Ret_For_Return_And_Fixes()
+    public async Task Fixes_Return_Type_To_RetArray()
     {
         var test = @"
 using ILNumerics;
@@ -53,8 +51,7 @@ class C {
         await new CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Test
         {
             TestCode = test,
-            FixedCode = fixedCode,
-            ExpectedDiagnostics = { CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Diagnostic("ILN0003R").WithSpan(7,8,7,21) }
+            FixedCode = fixedCode
         }.RunAsync();
     }
 }

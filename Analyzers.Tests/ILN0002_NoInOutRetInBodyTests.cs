@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using ILNumerics.Community.Analyzers.Analyzers;
-using Microsoft.CodeAnalysis.Testing;
 using Xunit;
 
 namespace ILNumerics.Community.Analyzers.Tests;
@@ -29,9 +28,9 @@ class C {
             TestCode = test,
             ExpectedDiagnostics =
             {
-                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(7,6,7,22),
-                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(9,6,9,23),
-                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(12,9,12,24),
+                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(7, 6, 7, 22),
+                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(9, 6, 9, 23),
+                CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Diagnostic("ILN0002").WithSpan(12, 9, 12, 24)
             }
         }.RunAsync();
     }
