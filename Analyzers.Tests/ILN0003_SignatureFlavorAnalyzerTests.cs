@@ -15,16 +15,9 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M([|Array<double>|] a) { }
+    public void M(Array<double> {|ILN0003:a|}) { }
 }";
-        await new CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Test
-        {
-            TestCode = test,
-            ExpectedDiagnostics =
-            {
-                CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Diagnostic("ILN0003").WithSpan(7, 18, 7, 31)
-            }
-        }.RunAsync();
+        await new CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Test { TestCode = test }.RunAsync();
     }
 
     [Fact]
@@ -35,15 +28,8 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public [|Array<double>|] M() { return zeros<double>(3,4); }
+    public Array<double> {|ILN0003R:M|}() { return zeros<double>(3,4); }
 }";
-        await new CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Test
-        {
-            TestCode = test,
-            ExpectedDiagnostics =
-            {
-                CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Diagnostic("ILN0003R").WithSpan(7, 8, 7, 21)
-            }
-        }.RunAsync();
+        await new CSharpVerifier<ILN0003_SignatureFlavorAnalyzer, ILN0003_SignatureFlavorFix>.Test { TestCode = test }.RunAsync();
     }
 }

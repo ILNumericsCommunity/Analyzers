@@ -15,16 +15,9 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M(out Array<double> a) { a = zeros<double>(3,4); }
+    public void M(out Array<double> [|a|]) { a = zeros<double>(3,4); }
 }";
-        await new CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Test
-        {
-            TestCode = test,
-            ExpectedDiagnostics =
-            {
-                CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Diagnostic("ILN0004").WithSpan(6, 37, 6, 38)
-            }
-        }.RunAsync();
+        await new CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Test { TestCode = test }.RunAsync();
     }
 
     [Fact]
@@ -35,15 +28,8 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M(ref Array<double> a) { }
+    public void M(ref Array<double> [|a|]) { }
 }";
-        await new CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Test
-        {
-            TestCode = test,
-            ExpectedDiagnostics =
-            {
-                CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Diagnostic("ILN0004").WithSpan(6, 37, 6, 38)
-            }
-        }.RunAsync();
+        await new CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Test { TestCode = test }.RunAsync();
     }
 }

@@ -15,19 +15,21 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M(out Array<double> a) { a = zeros<double>(3,4); }
+    public void M(out Array<double> [|a|]) { a = zeros<double>(3,4); }
 }";
         var fixedCode = @"
 using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M(OutArray<double> a) { a = zeros<double>(3,4); }
+    public void M(OutArray<double> a) { a.a = zeros<double>(3,4); }
 }";
         await new CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Test
         {
             TestCode = test,
-            FixedCode = fixedCode
+            FixedCode = fixedCode,
+            NumberOfFixAllIterations = 2,
+            NumberOfIncrementalIterations = 2
         }.RunAsync();
     }
 
@@ -39,7 +41,7 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M(ref Array<double> a) { }
+    public void M(ref Array<double> [|a|]) { }
 }";
         var fixedCode = @"
 using ILNumerics;

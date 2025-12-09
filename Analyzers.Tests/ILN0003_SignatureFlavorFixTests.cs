@@ -15,7 +15,7 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public void M([|Array<double>|] a) { }
+    public void M(Array<double> {|ILN0003:a|}) { }
 }";
         var fixedCode = @"
 using ILNumerics;
@@ -39,7 +39,7 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    public [|Array<double>|] M() { return zeros<double>(3,4); }
+    public Array<double> {|ILN0003R:M|}() { return zeros<double>(3,4); }
 }";
         var fixedCode = @"
 using ILNumerics;

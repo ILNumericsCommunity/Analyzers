@@ -15,28 +15,49 @@ namespace ILNumerics.Community.Analyzers.CodeFixes;
 [Shared]
 public sealed class ILN0005_LocalMemberForFieldsFix : CodeFixProvider
 {
-    public override ImmutableArray<string> FixableDiagnosticIds => ["ILN0005"];
+    public override ImmutableArray<string> FixableDiagnosticIds => ["ILN0005", "ILN0005A"];
 
     public override FixAllProvider GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;
 
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+        if (root is null)
+            return;
+
         var diagnostic = context.Diagnostics.First();
         var span = diagnostic.Location.SourceSpan;
 
-        // Find the field declarator corresponding to the diagnostic
-        if (root?.FindNode(span) is not VariableDeclaratorSyntax declarator)
-            return;
+        if (diagnostic.Id == "ILN0005")
+        {
+            // Find the field declarator corresponding to the diagnostic
+            if (root.FindNode(span) is not VariableDeclaratorSyntax declarator)
+                return;
 
-        var fieldDecl = declarator.FirstAncestorOrSelf<FieldDeclarationSyntax>();
-        if (fieldDecl is null)
-            return;
+            var fieldDecl = declarator.FirstAncestorOrSelf<FieldDeclarationSyntax>();
+            if (fieldDecl is null)
+                return;
 
-        context.RegisterCodeFix(CodeAction.Create("Use localMember<T>() and readonly field", ct => ApplyFixAsync(context.Document, fieldDecl, declarator, ct), "ILN0005_UseLocalMember"), diagnostic);
+            context.RegisterCodeFix(CodeAction.Create("Use localMember<T>() and readonly field",
+                                                      ct => ApplyLocalMemberFixAsync(context.Document, fieldDecl, declarator, ct),
+                                                      "ILN0005_UseLocalMember"), diagnostic);
+        }
+        else if (diagnostic.Id == "ILN0005A")
+        {
+            // Find the assignment expression that writes directly to the field
+            var node = root.FindNode(span);
+            var assignment = node.FirstAncestorOrSelf<AssignmentExpressionSyntax>();
+            if (assignment is null)
+                return;
+
+            context.RegisterCodeFix(CodeAction.Create("Assign via .a property",
+                                                      ct => UseDotAAssignmentAsync(context.Document, assignment, ct),
+                                                      "ILN0005A_UseDotA"), diagnostic);
+        }
     }
 
-    private static async Task<Document> ApplyFixAsync(Document document, FieldDeclarationSyntax fieldDecl, VariableDeclaratorSyntax declarator, CancellationToken ct)
+    private static async Task<Document> ApplyLocalMemberFixAsync(Document document, FieldDeclarationSyntax fieldDecl, VariableDeclaratorSyntax declarator,
+                                                                 CancellationToken ct)
     {
         var root = await document.GetSyntaxRootAsync(ct).ConfigureAwait(false);
         if (root is null)
@@ -72,5 +93,25 @@ public sealed class ILN0005_LocalMemberForFieldsFix : CodeFixProvider
         var newRoot = root.ReplaceNode(fieldDecl, newFieldDecl);
 
         return document.WithSyntaxRoot(newRoot);
+    }
+
+    private static async Task<Document> UseDotAAssignmentAsync(Document document, AssignmentExpressionSyntax assignment, CancellationToken ct)
+    {
+        var root = await document.GetSyntaxRootAsync(ct).ConfigureAwait(false);
+        if (root is null)
+            return document;
+
+        // Replace `_A = value` with `_A.a = value`
+        if (assignment.Left is IdentifierNameSyntax id)
+        {
+            var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, id, SyntaxFactory.Token(SyntaxKind.DotToken),
+                                                                    SyntaxFactory.IdentifierName("a"));
+            var newAssignment = assignment.WithLeft(memberAccess);
+            var newRoot = root.ReplaceNode(assignment, newAssignment);
+
+            return document.WithSyntaxRoot(newRoot);
+        }
+
+        return document;
     }
 }
