@@ -1,6 +1,6 @@
 <Project>
   <!-- GitInfo (SemVer) -->
-  <Target Name="GitInfo">
+  <Target Name="GitInfo" BeforeTargets="MinVer">
     <Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
       <Output TaskParameter="ConsoleOutput" PropertyName="GitSHA"/>
     </Exec>

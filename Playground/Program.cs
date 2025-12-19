@@ -9,18 +9,26 @@ internal static class Program
 {
     public static void Main()
     {
-        // Example usages of the ILNxxxx diagnostics
+        // ILN0001
         ILN0001_NoVarForArrays();
 
+        // ILN0002
         var c = new ILN0002_NoInOutRetInBody_Class();
         c.M();
 
+        // ILN0003
         var d = ILN0003_SignatureFlavor(zeros<double>(2, 2));
 
+        // ILN0004
         ILN0004_NoRefOrOutWithILNumericsArrays(out var e);
 
+        // ILN0005 and ILN0005A
         var fieldClass = new ClassWithArrayFields(zeros<double>(2, 2));
         fieldClass.Update(zeros<double>(2, 1));
+
+        // ILN0006: Use GetValue (and SetValue) for scalar access
+        Array<double> f = zeros<double>(3, 4);
+        double fv = (double) f[1, 2];
     }
 
     // ILN0001: No 'var' for ILNumerics arrays
@@ -60,8 +68,8 @@ internal static class Program
 }
 
 // ILN0005: Enforce localMember<T>() initialization for fields
-// ILN0006: Enforce .a / Assign() for field writes
-internal sealed class ClassWithArrayFields
+// ILN0005A: Enforce .a / Assign() for field writes
+internal class ClassWithArrayFields
 {
     private Array<double> _fieldA;
     private Array<double> _fieldB = zeros<double>(2, 3);

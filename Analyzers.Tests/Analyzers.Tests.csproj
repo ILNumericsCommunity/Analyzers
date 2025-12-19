@@ -4,6 +4,8 @@
     <RootNamespace>ILNumerics.Community.Analyzers.Tests</RootNamespace>
     <AssemblyName>ILNumerics.Community.Analyzers.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ILNumerics.Computing" Version="7.4.3" />
@@ -19,6 +21,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Analyzers\Analyzers.csproj" />
