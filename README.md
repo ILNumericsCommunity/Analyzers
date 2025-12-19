@@ -39,6 +39,10 @@ dotnet add package ILNumerics.Community.Analyzers
 
   Instance fields of ILNumerics `Array<T>` types are treated as local members: they should be initialized via `localMember<T>()`. `ILN0005` flags non‑static `Array<T>` fields that either have no initializer or use something other than `localMember<T>()`. Valid writes to fields must use either `_A.a = ...` or `_A.Assign(...)`, which keeps the field buffer stable following expected lifetime conventions.
 
+- **ILN0006 — Use `GetValue()`/`SetValue()` for scalar element access**
+
+  Scalar reads from ILNumerics `Array<T>` should use `GetValue(...)` rather than indexer access combined with an explicit cast (for example: `(T) A[i, j]`). `ILN0006` reports cases where an element access is cast to the array's element type, and the code fix rewrites it to `A.GetValue(i, j)` to make scalar access explicit and consistent.
+
 ### Troubleshooting
 
 No squiggles but lightbulb available: enable live analysis in the IDE (VS: Tools → Options → Text Editor → C# → Advanced → Enable .NET analyzers, Full solution analysis) and ensure `.editorconfig` does not suppress diagnostics.
