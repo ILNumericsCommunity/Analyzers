@@ -37,16 +37,19 @@ public sealed class ILN0004_NoRefOutFix : CodeFixProvider
 
     private static async Task<Document> FixAsync(Document doc, ParameterSyntax param, CancellationToken ct)
     {
+        var root = await doc.GetSyntaxRootAsync(ct).ConfigureAwait(false);
+        if (root is null)
+            return doc;
+
         // Remove ref/out modifiers from the parameter
         var newModifiers = new SyntaxTokenList(param.Modifiers.Where(m => m.Kind() != SyntaxKind.OutKeyword && m.Kind() != SyntaxKind.RefKeyword));
         var newType = param.Type;
 
         // If type is Array<T>, suggest OutArray<T> by replacing 'Array' with 'OutArray'.
         if (newType is GenericNameSyntax g && g.Identifier.Text == "Array")
-            newType = g.WithIdentifier(SyntaxFactory.Identifier("OutArray"));
+            newType = g.WithIdentifier(SyntaxFactory.Identifier("OutArray")).WithTriviaFrom(param.Type!);
 
         var newParam = param.WithModifiers(newModifiers).WithType(newType!);
-        var root = await doc.GetSyntaxRootAsync(ct).ConfigureAwait(false);
 
         // Update assignments to the former out/ref parameter to use the backing field 'a'
         if (param.Parent?.Parent is MethodDeclarationSyntax method)
@@ -65,16 +68,17 @@ public sealed class ILN0004_NoRefOutFix : CodeFixProvider
 
                 if (newBody != null)
                 {
-                    var newMethod = method.WithBody(newBody);
-                    root = root!.ReplaceNode(method, newMethod);
+                    // Build new method with updated body AND updated parameter in one operation
+                    // to avoid stale node references
+                    var newParamList = method.ParameterList.ReplaceNode(param, newParam);
+                    var newMethod = method.WithBody(newBody).WithParameterList(newParamList);
+                    return doc.WithSyntaxRoot(root.ReplaceNode(method, newMethod));
                 }
             }
         }
 
-        // Finally, replace the original parameter with the updated one
-        root = root!.ReplaceNode(param, newParam);
-
-        return doc.WithSyntaxRoot(root);
+        // No method body rewriting needed, just replace the parameter
+        return doc.WithSyntaxRoot(root.ReplaceNode(param, newParam));
     }
 
     // Rewrites simple assignments to the parameter into assignments to the OutArray backing field

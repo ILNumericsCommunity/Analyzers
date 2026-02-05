@@ -134,11 +134,11 @@ public sealed class ILN0005_LocalMemberForFieldsFix : CodeFixProvider
         if (assignments.Length == 0)
             return document;
 
-        var newRoot = root;
-
-        foreach (var assignment in assignments)
+        // Use ReplaceNodes to replace all assignments in a single operation
+        // This avoids the issue of nodes becoming stale after the first replacement
+        var newRoot = root.ReplaceNodes(assignments, (original, _) =>
         {
-            var id = (IdentifierNameSyntax)assignment.Left;
+            var id = (IdentifierNameSyntax)original.Left;
 
             var memberAccess = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
@@ -146,9 +146,8 @@ public sealed class ILN0005_LocalMemberForFieldsFix : CodeFixProvider
                 SyntaxFactory.Token(SyntaxKind.DotToken),
                 SyntaxFactory.IdentifierName("a"));
 
-            var newAssignment = assignment.WithLeft(memberAccess);
-            newRoot = newRoot.ReplaceNode(assignment, newAssignment);
-        }
+            return original.WithLeft(memberAccess);
+        });
 
         return document.WithSyntaxRoot(newRoot);
     }

@@ -45,46 +45,12 @@ public sealed class ILN0001_NoVarForArraysFix : CodeFixProvider
             return doc;
 
         // Prefer ILNumerics local types: Array<T>, Logical, Cell
-        var preferredType = CreateLocalIlnTypeSyntax(namedType);
-        var explicitType = preferredType.WithTriviaFrom(decl.Type);
+        var preferredTypeName = ILNTypes.GetPreferredLocalTypeName(namedType);
+        var explicitType = SyntaxFactory.ParseTypeName(preferredTypeName).WithTriviaFrom(decl.Type);
 
         var newDecl = decl.WithType(explicitType);
         var root = await doc.GetSyntaxRootAsync(ct).ConfigureAwait(false);
 
         return doc.WithSyntaxRoot(root!.ReplaceNode(decl, newDecl));
-    }
-
-    private static TypeSyntax? CreateLocalIlnTypeSyntax(INamedTypeSymbol type)
-    {
-        // Prefer ILNumerics local types: Array<T>, Logical, Cell
-        if (type.ContainingNamespace?.ToDisplayString() != "ILNumerics")
-            return null;
-
-        // In/Out/Ret/Array<T> => Array<T>
-        if (Is(type, "Array`1") || Is(type, "InArray`1") || Is(type, "OutArray`1") || Is(type, "RetArray`1"))
-        {
-            if (type.TypeArguments.Length == 1)
-            {
-                var elemName = type.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-
-                return SyntaxFactory.ParseTypeName($"Array<{elemName}>");
-            }
-        }
-
-        // In/Out/Ret/Logical => Logical
-        if (Is(type, "Logical") || Is(type, "InLogical") || Is(type, "OutLogical") || Is(type, "RetLogical"))
-            return SyntaxFactory.IdentifierName("Logical");
-
-        // In/Out/Ret/Cell => Cell
-        if (Is(type, "Cell") || Is(type, "InCell") || Is(type, "OutCell") || Is(type, "RetCell"))
-            return SyntaxFactory.IdentifierName("Cell");
-
-        // Fallback to the exact inferred type name (minimally qualified)
-        return SyntaxFactory.ParseTypeName(type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-    }
-
-    private static bool Is(INamedTypeSymbol t, string metadataName)
-    {
-        return t.MetadataName == metadataName;
     }
 }

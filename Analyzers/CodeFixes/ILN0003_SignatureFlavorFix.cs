@@ -47,7 +47,7 @@ public sealed class ILN0003_SignatureFlavorFix : CodeFixProvider
 
     private static async Task<Document> ParamToInAsync(Document doc, ParameterSyntax param, CancellationToken ct)
     {
-        var newType = ToIlFlavor(param.Type!, "InArray");
+        var newType = ToIlFlavor(param.Type!, "InArray").WithTriviaFrom(param.Type!);
         var newParam = param.WithType(newType);
         var root = await doc.GetSyntaxRootAsync(ct).ConfigureAwait(false);
 
@@ -56,7 +56,7 @@ public sealed class ILN0003_SignatureFlavorFix : CodeFixProvider
 
     private static async Task<Document> ParamToOutAsync(Document doc, ParameterSyntax param, CancellationToken ct)
     {
-        var newType = ToIlFlavor(param.Type!, "OutArray");
+        var newType = ToIlFlavor(param.Type!, "OutArray").WithTriviaFrom(param.Type!);
         var newParam = param.WithType(newType);
         var root = await doc.GetSyntaxRootAsync(ct).ConfigureAwait(false);
 
@@ -66,7 +66,7 @@ public sealed class ILN0003_SignatureFlavorFix : CodeFixProvider
     private static async Task<Document> ReturnToRetAsync(Document doc, MethodDeclarationSyntax method, CancellationToken ct)
     {
         var retType = method.ReturnType;
-        var newType = ToIlFlavor(retType, "RetArray");
+        var newType = ToIlFlavor(retType, "RetArray").WithTriviaFrom(retType);
         var newMethod = method.WithReturnType(newType);
         var root = await doc.GetSyntaxRootAsync(ct).ConfigureAwait(false);
 
@@ -75,8 +75,13 @@ public sealed class ILN0003_SignatureFlavorFix : CodeFixProvider
 
     private static TypeSyntax ToIlFlavor(TypeSyntax type, string flavor)
     {
+        // Handle Array<T> -> InArray<T>/OutArray<T>/RetArray<T>
         if (type is GenericNameSyntax g && g.Identifier.Text == "Array")
             return g.WithIdentifier(SyntaxFactory.Identifier(flavor));
+
+        // Handle qualified names like ILNumerics.Array<T>
+        if (type is QualifiedNameSyntax { Right: GenericNameSyntax qg } qualified && qg.Identifier.Text == "Array")
+            return qualified.WithRight(qg.WithIdentifier(SyntaxFactory.Identifier(flavor)));
 
         // Fallback: wrap plain 'Array' without generic args
         if (type is IdentifierNameSyntax id && id.Identifier.Text == "Array")

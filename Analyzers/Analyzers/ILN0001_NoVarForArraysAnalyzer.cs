@@ -9,12 +9,8 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0001_NoVarForArraysAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0001",
-                                                           "Don't use 'var' for ILNumerics arrays",
-                                                           "Use explicit '{0}' instead of 'var' for ILNumerics arrays",
-                                                           "ILNumerics",
-                                                           DiagnosticSeverity.Error,
-                                                           true,
+    public static readonly DiagnosticDescriptor Rule = new("ILN0001", "Don't use 'var' for ILNumerics arrays", "Use explicit '{0}' instead of 'var' for ILNumerics arrays",
+                                                           "ILNumerics", DiagnosticSeverity.Error, true,
                                                            "Implicitly-typed locals ('var') are forbidden for ILNumerics arrays to prevent RetArray reuse bugs.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
@@ -50,9 +46,9 @@ public sealed class ILN0001_NoVarForArraysAnalyzer : DiagnosticAnalyzer
                     else if (ls.Type is INamedTypeSymbol symType)
                         ilnType = symType;
 
-                    if (isVar && ilnType is not null && IlnTypes.IsAnyIln(ilnType))
+                    if (isVar && ilnType is not null && ILNTypes.IsAnyIln(ilnType))
                     {
-                        var preferredName = GetPreferredLocalIlnTypeName(ilnType);
+                        var preferredName = ILNTypes.GetPreferredLocalTypeName(ilnType);
 
                         // Report on the variable identifier
                         ctx.ReportDiagnostic(Diagnostic.Create(Rule, v.Syntax.GetLocation(), preferredName));
@@ -66,30 +62,5 @@ public sealed class ILN0001_NoVarForArraysAnalyzer : DiagnosticAnalyzer
         }
     }
 
-    private static string GetPreferredLocalIlnTypeName(INamedTypeSymbol type)
-    {
-        // Prefer ILNumerics local types: Array<T>, Logical, Cell
-        if (type.ContainingNamespace?.ToDisplayString() == "ILNumerics")
-        {
-            // In/Out/Ret/Array<T> => Array<T>
-            if ((type.MetadataName == "Array`1" || type.MetadataName == "InArray`1" || type.MetadataName == "OutArray`1" || type.MetadataName == "RetArray`1")
-                && type.TypeArguments.Length == 1)
-            {
-                var elemName = type.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-
-                return $"Array<{elemName}>";
-            }
-
-            // In/Out/Ret/Logical => Logical
-            if (type.MetadataName == "Logical" || type.MetadataName == "InLogical" || type.MetadataName == "OutLogical" || type.MetadataName == "RetLogical")
-                return "Logical";
-
-            // In/Out/Ret/Cell => Cell
-            if (type.MetadataName == "Cell" || type.MetadataName == "InCell" || type.MetadataName == "OutCell" || type.MetadataName == "RetCell")
-                return "Cell";
-        }
-
-        // Fallback to the exact inferred type name (minimally qualified)
-        return type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-    }
+    private static string GetPreferredLocalIlnTypeName(INamedTypeSymbol type) => ILNTypes.GetPreferredLocalTypeName(type);
 }

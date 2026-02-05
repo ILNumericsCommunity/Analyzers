@@ -8,8 +8,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ILNumerics.Computing" Version="7.4.3" />
-    <PackageReference Include="MinVer" Version="6.0.0">
+    <PackageReference Include="ILNumerics.Computing" Version="7.4.16" />
+    <PackageReference Include="MinVer" Version="7.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

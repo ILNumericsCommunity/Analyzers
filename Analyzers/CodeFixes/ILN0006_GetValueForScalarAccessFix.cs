@@ -37,9 +37,8 @@ public sealed class ILN0006_GetValueForScalarAccessFix : CodeFixProvider
         if (elementAccess is null)
             return;
 
-        context.RegisterCodeFix(CodeAction.Create("Use GetValue(...)",
-                                                  ct => ReplaceWithGetValueAsync(context.Document, cast, elementAccess, ct),
-                                                  "ILN0006_UseGetValue"), diagnostic);
+        context.RegisterCodeFix(CodeAction.Create("Use GetValue(...)", ct => ReplaceWithGetValueAsync(context.Document, cast, elementAccess, ct), "ILN0006_UseGetValue"),
+                                diagnostic);
     }
 
     private static async Task<Document> ReplaceWithGetValueAsync(Document document, CastExpressionSyntax cast, ElementAccessExpressionSyntax elementAccess, CancellationToken ct)
@@ -49,8 +48,7 @@ public sealed class ILN0006_GetValueForScalarAccessFix : CodeFixProvider
             return document;
 
         // Build: <expr>.GetValue(<indices...>)
-        var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression,
-                                                                AddParensIfNeeded(elementAccess.Expression),
+        var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, AddParensIfNeeded(elementAccess.Expression),
                                                                 SyntaxFactory.IdentifierName("GetValue"));
 
         var invocation = SyntaxFactory.InvocationExpression(memberAccess, SyntaxFactory.ArgumentList(elementAccess.ArgumentList.Arguments));
@@ -62,9 +60,7 @@ public sealed class ILN0006_GetValueForScalarAccessFix : CodeFixProvider
     }
 
     private static ExpressionSyntax AddParensIfNeeded(ExpressionSyntax expr)
-    {
-        return (expr is IdentifierNameSyntax or MemberAccessExpressionSyntax or ElementAccessExpressionSyntax or InvocationExpressionSyntax)
+        => expr is IdentifierNameSyntax or MemberAccessExpressionSyntax or ElementAccessExpressionSyntax or InvocationExpressionSyntax
             ? expr
             : SyntaxFactory.ParenthesizedExpression(expr);
-    }
 }

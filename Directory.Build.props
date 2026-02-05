@@ -25,7 +25,7 @@
   </Target>
 	<!-- Project Defaults  -->
 	<PropertyGroup>
-		<LangVersion>13.0</LangVersion>
+		<LangVersion>14.0</LangVersion>
 		<Nullable>enable</Nullable>
     <AnalysisLevel>latest</AnalysisLevel>
 		<ImplicitUsings>false</ImplicitUsings>

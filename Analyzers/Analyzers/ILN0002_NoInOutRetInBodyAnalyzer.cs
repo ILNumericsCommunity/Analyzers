@@ -1,21 +1,18 @@
-using System.Linq;
 using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ILNumerics.Community.Analyzers.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0002",
-                                                           "Only In/Out/Ret in method signatures",
-                                                           "Type '{0}' should only appear in method signatures (not in locals/fields/properties)",
-                                                           "ILNumerics",
-                                                           DiagnosticSeverity.Warning,
-                                                           true);
+    public static readonly DiagnosticDescriptor Rule = new("ILN0002", "Only In/Out/Ret in method signatures",
+                                                           "Type '{0}' should only appear in method signatures (not in locals/fields/properties)", "ILNumerics",
+                                                           DiagnosticSeverity.Warning, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
@@ -33,7 +30,7 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeField(SymbolAnalysisContext ctx)
     {
         var f = (IFieldSymbol) ctx.Symbol;
-        if (f.Type is INamedTypeSymbol t && (IlnTypes.IsIlnIn(t) || IlnTypes.IsIlnOut(t) || IlnTypes.IsIlnRet(t)))
+        if (f.Type is INamedTypeSymbol t && (ILNTypes.IsIlnIn(t) || ILNTypes.IsIlnOut(t) || ILNTypes.IsIlnRet(t)))
         {
             var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
@@ -45,11 +42,8 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
             if (syntaxRef != null)
             {
                 var syntax = syntaxRef.GetSyntax(ctx.CancellationToken);
-                if (syntax is VariableDeclaratorSyntax variable &&
-                    variable.Parent is VariableDeclarationSyntax declaration)
-                {
+                if (syntax is VariableDeclaratorSyntax variable && variable.Parent is VariableDeclarationSyntax declaration)
                     ctx.ReportDiagnostic(Diagnostic.Create(Rule, declaration.Type.GetLocation(), typeName));
-                }
             }
         }
     }
@@ -57,22 +51,22 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeProperty(SymbolAnalysisContext ctx)
     {
         var p = (IPropertySymbol) ctx.Symbol;
-        if (p.Type is INamedTypeSymbol t && (IlnTypes.IsIlnIn(t) || IlnTypes.IsIlnOut(t) || IlnTypes.IsIlnRet(t)))
+        if (p.Type is INamedTypeSymbol t && (ILNTypes.IsIlnIn(t) || ILNTypes.IsIlnOut(t) || ILNTypes.IsIlnRet(t)))
         {
             var hasGet = p.GetMethod != null;
             var hasSet = p.SetMethod != null;
             var isInitOnly = p.SetMethod?.IsInitOnly == true; // Roslyn exposes init-only via SetMethod
 
             // Allow: get-only properties of Ret*
-            if (IlnTypes.IsIlnRet(t) && hasGet && !hasSet)
+            if (ILNTypes.IsIlnRet(t) && hasGet && !hasSet)
                 return;
 
             // Allow: set-only properties of In*
-            if (IlnTypes.IsIlnIn(t) && !hasGet && hasSet)
+            if (ILNTypes.IsIlnIn(t) && !hasGet && hasSet)
                 return;
 
             // Allow: init-only properties of In* (usually have get + init set)
-            if (IlnTypes.IsIlnIn(t) && isInitOnly)
+            if (ILNTypes.IsIlnIn(t) && isInitOnly)
                 return;
 
             // All other cases (including Out*, any Ret* with a setter, any In* with getter that is not init-only) are reported
@@ -87,9 +81,7 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
             {
                 var syntax = syntaxRef.GetSyntax(ctx.CancellationToken);
                 if (syntax is PropertyDeclarationSyntax property)
-                {
                     ctx.ReportDiagnostic(Diagnostic.Create(Rule, property.Type.GetLocation(), typeName));
-                }
             }
         }
     }
@@ -101,7 +93,7 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
         {
             foreach (var v in decl.Declarators)
             {
-                if (v.Symbol?.Type is INamedTypeSymbol t && (IlnTypes.IsIlnIn(t) || IlnTypes.IsIlnOut(t) || IlnTypes.IsIlnRet(t)))
+                if (v.Symbol?.Type is INamedTypeSymbol t && (ILNTypes.IsIlnIn(t) || ILNTypes.IsIlnOut(t) || ILNTypes.IsIlnRet(t)))
                 {
                     var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
@@ -110,9 +102,7 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
 
                     // Also report on the local type syntax, e.g. RetArray<double>
                     if (decl.Syntax is VariableDeclarationSyntax declaration)
-                    {
                         ctx.ReportDiagnostic(Diagnostic.Create(Rule, declaration.Type.GetLocation(), typeName));
-                    }
                 }
             }
         }

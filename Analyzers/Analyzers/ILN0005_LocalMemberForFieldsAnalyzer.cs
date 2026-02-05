@@ -10,19 +10,12 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0005",
-                                                           "ILNumerics fields should use localMember<T>() pattern",
-                                                           "Field '{0}' of type '{1}' should be initialized via localMember<T>()",
-                                                           "ILNumerics",
-                                                           DiagnosticSeverity.Info,
-                                                           true);
-
-    public static readonly DiagnosticDescriptor AssignRule = new("ILN0005A",
-                                                                 "ILNumerics fields should be assigned via '.a' or Assign()",
-                                                                 "Field '{0}' should be assigned via '{0}.a = ...' or '{0}.Assign(...)'",
-                                                                 "ILNumerics",
-                                                                 DiagnosticSeverity.Warning,
+    public static readonly DiagnosticDescriptor AssignRule = new("ILN0005A", "ILNumerics fields should be assigned via '.a' or Assign()",
+                                                                 "Field '{0}' should be assigned via '{0}.a = ...' or '{0}.Assign(...)'", "ILNumerics", DiagnosticSeverity.Warning,
                                                                  true);
+
+    public static readonly DiagnosticDescriptor Rule = new("ILN0005", "ILNumerics fields should use localMember<T>() pattern",
+                                                           "Field '{0}' of type '{1}' should be initialized via localMember<T>()", "ILNumerics", DiagnosticSeverity.Info, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule, AssignRule];
 
@@ -44,7 +37,7 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
         if (ctx.Symbol is not IFieldSymbol field)
             return;
 
-        if (field.Type is not INamedTypeSymbol t || !IlnTypes.IsArray(t))
+        if (field.Type is not INamedTypeSymbol t || !ILNTypes.IsArray(t))
             return;
 
         // Only care about instance fields
@@ -60,9 +53,7 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
         var initializer = syntax?.Initializer;
         if (syntax != null && initializer != null)
         {
-            if (initializer.Value is InvocationExpressionSyntax invocation &&
-                invocation.Expression is GenericNameSyntax gName &&
-                gName.Identifier.Text == "localMember")
+            if (initializer.Value is InvocationExpressionSyntax invocation && invocation.Expression is GenericNameSyntax gName && gName.Identifier.Text == "localMember")
             {
                 // Pattern already followed (do not report).
                 return;
@@ -84,10 +75,8 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
         var target = op.Target;
 
         // Allow pattern: _A.a = ...
-        if (target is IPropertyReferenceOperation propRef &&
-            propRef.Instance is IFieldReferenceOperation fieldPropRef &&
-            IsIlnArrayField(fieldPropRef.Field) &&
-            propRef.Property.Name == "a")
+        if (target is IPropertyReferenceOperation propRef && propRef.Instance is IFieldReferenceOperation fieldPropRef && IsIlnArrayField(fieldPropRef.Field)
+            && propRef.Property.Name == "a")
             return;
 
         // If assignment goes directly to the field, flag it
@@ -97,19 +86,11 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
 
     private static void AnalyzeInvocation(OperationAnalysisContext ctx)
     {
-        var invocation = (IInvocationOperation) ctx.Operation;
-
-        // Allow: _A.Assign(...)
-        if (invocation.Instance is IFieldReferenceOperation fieldRef &&
-            IsIlnArrayField(fieldRef.Field) &&
-            invocation.TargetMethod.Name == "Assign")
-        {
-            return;
-        }
+        // This method is registered to allow future extension for detecting
+        // other assignment patterns (e.g., via extension methods).
+        // Currently, _A.Assign(...) is implicitly allowed by not being flagged
+        // in AnalyzeAssignment. This hook exists for completeness.
     }
 
-    private static bool IsIlnArrayField(IFieldSymbol field)
-    {
-        return !field.IsStatic && field.Type is INamedTypeSymbol t && IlnTypes.IsArray(t);
-    }
+    private static bool IsIlnArrayField(IFieldSymbol field) => !field.IsStatic && field.Type is INamedTypeSymbol t && ILNTypes.IsArray(t);
 }
