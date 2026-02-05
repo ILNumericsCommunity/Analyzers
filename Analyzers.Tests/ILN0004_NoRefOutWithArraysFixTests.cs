@@ -27,9 +27,7 @@ class C {
         await new CSharpVerifier<ILN0004_NoRefOutWithArraysAnalyzer, ILN0004_NoRefOutFix>.Test
         {
             TestCode = test,
-            FixedCode = fixedCode,
-            NumberOfFixAllIterations = 2,
-            NumberOfIncrementalIterations = 2
+            FixedCode = fixedCode
         }.RunAsync();
     }
 

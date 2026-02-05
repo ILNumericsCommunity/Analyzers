@@ -7,12 +7,8 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0004_NoRefOutWithArraysAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0004",
-                                                           "Avoid 'out/ref' with IL arrays",
-                                                           "Parameter '{0}' uses '{1}' (prefer 'OutArray<>' and remove 'out/ref')",
-                                                           "ILNumerics",
-                                                           DiagnosticSeverity.Warning,
-                                                           true);
+    public static readonly DiagnosticDescriptor Rule = new("ILN0004", "Avoid 'out/ref' with IL arrays", "Parameter '{0}' uses '{1}' (prefer 'OutArray<>' and remove 'out/ref')",
+                                                           "ILNumerics", DiagnosticSeverity.Warning, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
@@ -33,7 +29,7 @@ public sealed class ILN0004_NoRefOutWithArraysAnalyzer : DiagnosticAnalyzer
         if (!p.RefKind.HasFlag(RefKind.Ref) && !p.RefKind.HasFlag(RefKind.Out))
             return;
 
-        if (p.Type is INamedTypeSymbol t && IlnTypes.IsAnyIln(t))
+        if (p.Type is INamedTypeSymbol t && ILNTypes.IsAnyIln(t))
         {
             var kind = p.RefKind.ToString().ToLowerInvariant();
             ctx.ReportDiagnostic(Diagnostic.Create(Rule, p.Locations[0], p.Name, kind));
