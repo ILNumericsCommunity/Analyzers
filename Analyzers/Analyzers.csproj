@@ -4,7 +4,7 @@
     <RootNamespace>ILNumerics.Community.Analyzers</RootNamespace>
     <AssemblyName>ILNumerics.Community.Analyzers</AssemblyName>
     <PackageId>ILNumerics.Community.Analyzers</PackageId>
-    <PackageType>Analyzer</PackageType>
+    <DevelopmentDependency>true</DevelopmentDependency>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <RunAnalyzersDuringLiveAnalysis>true</RunAnalyzersDuringLiveAnalysis>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
