@@ -61,15 +61,11 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
             if (ILNTypes.IsIlnRet(t) && hasGet && !hasSet)
                 return;
 
-            // Allow: set-only properties of In*
-            if (ILNTypes.IsIlnIn(t) && !hasGet && hasSet)
+            // Allow: set-only or init-only properties of In*
+            if (ILNTypes.IsIlnIn(t) && (!hasGet && hasSet || isInitOnly))
                 return;
 
-            // Allow: init-only properties of In* (usually have get + init set)
-            if (ILNTypes.IsIlnIn(t) && isInitOnly)
-                return;
-
-            // All other cases (including Out*, any Ret* with a setter, any In* with getter that is not init-only) are reported
+            // Warning: all other cases (including Out*, any Ret* with a setter, any In* with a non-init getter+setter)
             var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
             // Report on the property identifier
