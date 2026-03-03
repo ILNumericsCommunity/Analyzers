@@ -43,6 +43,10 @@ dotnet add package ILNumerics.Community.Analyzers
 
   Scalar reads from ILNumerics `Array<T>` should use `GetValue(...)` rather than indexer access combined with an explicit cast (for example: `(T) A[i, j]`). `ILN0006` reports cases where an element access is cast to the array's element type, and the code fix rewrites it to `A.GetValue(i, j)` to make scalar access explicit and consistent.
 
+- **ILN0007 — Use `isnull()` for null checks on ILNumerics arrays**
+
+  ILNumerics arrays should use `ILMath.isnull()` for null checks instead of `== null` or `!= null`. Comparing an ILNumerics array directly to `null` can produce unexpected results due to operator overloads. `ILN0007` flags expressions like `arr == null` or `arr != null` and the code fix rewrites them to `isnull(arr)` or `!isnull(arr)` respectively.
+
 ### Troubleshooting
 
 No squiggles but lightbulb available: enable live analysis in the IDE (VS: Tools → Options → Text Editor → C# → Advanced → Enable .NET analyzers, Full solution analysis) and ensure `.editorconfig` does not suppress diagnostics.
