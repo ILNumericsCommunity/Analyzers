@@ -34,10 +34,6 @@ public sealed class ILN0003_SignatureFlavorAnalyzer : DiagnosticAnalyzer
         if (m.MethodKind != MethodKind.Ordinary)
             return;
 
-        // Restrict to public and internal APIs that form the surface area
-        if (m.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
-            return;
-
         // Parameters: flag plain Array<T> and suggest InArray/OutArray instead
         foreach (var p in m.Parameters)
         {
