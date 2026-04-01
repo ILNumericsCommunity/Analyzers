@@ -47,6 +47,10 @@ dotnet add package ILNumerics.Community.Analyzers
 
   ILNumerics arrays should use `ILMath.isnull()` for null checks instead of `== null` or `!= null`. Comparing an ILNumerics array directly to `null` can produce unexpected results due to operator overloads. `ILN0007` flags expressions like `arr == null` or `arr != null` and the code fix rewrites them to `isnull(arr)` or `!isnull(arr)` respectively.
 
+- **ILN0008 — ILNumerics `Array`/`Cell`/`Logical` fields must not be declared in records**
+
+  ILNumerics fields require manual lifetime management via `localMember<T>()`, `localCell()`, or `localLogical()`, which is incompatible with record semantics such as value equality and synthesized copy constructors. `ILN0008` flags any `Array<T>`, `Cell`, or `Logical` field declared in a `record` or `record struct` and reports an error. Use a regular `class` instead when ILNumerics array fields are needed.
+
 ### Troubleshooting
 
 No squiggles but lightbulb available: enable live analysis in the IDE (VS: Tools → Options → Text Editor → C# → Advanced → Enable .NET analyzers, Full solution analysis) and ensure `.editorconfig` does not suppress diagnostics.

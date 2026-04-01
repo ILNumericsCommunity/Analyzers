@@ -38,9 +38,7 @@ public sealed class ILN0003_SignatureFlavorAnalyzer : DiagnosticAnalyzer
         foreach (var p in m.Parameters)
         {
             if (p.Type is INamedTypeSymbol t && ILNTypes.IsArray(t))
-            {
                 ctx.ReportDiagnostic(Diagnostic.Create(ParamRule, p.Locations[0], p.Name, t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat), "InArray<>/OutArray<>"));
-            }
         }
 
         // Return type: flag plain Array<T> and suggest RetArray instead
