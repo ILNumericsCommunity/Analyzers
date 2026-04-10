@@ -55,17 +55,16 @@ public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
         {
             var hasGet = p.GetMethod != null;
             var hasSet = p.SetMethod != null;
-            var isInitOnly = p.SetMethod?.IsInitOnly == true; // Roslyn exposes init-only via SetMethod
 
-            // Allow: get-only properties of Ret*
-            if (ILNTypes.IsIlnRet(t) && hasGet && !hasSet)
+            // Allow: Ret* properties with a getter (get-only or full get+set)
+            if (ILNTypes.IsIlnRet(t) && hasGet)
                 return;
 
-            // Allow: set-only or init-only properties of In*
-            if (ILNTypes.IsIlnIn(t) && (!hasGet && hasSet || isInitOnly))
+            // Allow: set-only properties of In*
+            if (ILNTypes.IsIlnIn(t) && !hasGet && hasSet)
                 return;
 
-            // Warning: all other cases (including Out*, any Ret* with a setter, any In* with a non-init getter+setter)
+            // Warning: all other cases (including Out*, In* with a getter, Ret* set-only)
             var typeName = t.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
 
             // Report on the property identifier

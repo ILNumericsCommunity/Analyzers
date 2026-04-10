@@ -25,7 +25,7 @@ dotnet add package ILNumerics.Community.Analyzers
 
 - **ILN0002 — Only `In/Out/Ret` in signatures (not in bodies/fields/props)**
 
-  `InArray<T>`, `OutArray<T>`, and `RetArray<T>` are meant purely as API "flavors" for parameters and return types. They must not appear as locals, fields, or general properties. Exceptions are very constrained: get‑only `Ret*` properties, set‑only or init‑only `In*` properties are allowed as configuration‑style surfaces, but all other uses in the object model or locals are flagged.
+  `InArray<T>`, `OutArray<T>`, and `RetArray<T>` are meant purely as API "flavors" for parameters and return types. They must not appear as locals, fields, or general properties. Exceptions are very constrained: `Ret*` properties that have a getter (get‑only, get+set, or get+init) and `In*` properties without a getter (set‑only or init‑only) are allowed as configuration‑style surfaces, but all other uses in the object model or locals are flagged. `Out*` properties are always flagged regardless of accessors.
 
 - **ILN0003 — Function signatures should use ILNumerics flavors (in/out parameter and returns)**
 
