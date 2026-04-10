@@ -35,7 +35,7 @@ using static ILNumerics.ILMath;
 
 class C {
     [|InArray<double>|] [|InGetSet|] { get; set; }
-    [|RetArray<double>|] [|RetGetSet|] { get; set; }
+    RetArray<double> RetGetSet { get; set; }
     [|OutArray<double>|] [|OutGetSet|] { get; set; }
 }";
         await new CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
@@ -68,6 +68,32 @@ class C {
     }
 
     [Fact]
+    public async Task Allows_Ret_InitOnly_Property()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+class C {
+    RetArray<double> RetInitOnly { get; init; }
+}";
+        await new CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
+    }
+
+    [Fact]
+    public async Task Flags_In_InitOnly_Property()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+class C {
+    [|InArray<double>|] [|InInitOnly|] { get; init; }
+}";
+        await new CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
+    }
+
+    [Fact]
     public async Task Allows_In_InitOnly_Property()
     {
         var test = @"
@@ -75,7 +101,7 @@ using ILNumerics;
 using static ILNumerics.ILMath;
 
 class C {
-    InArray<double> InInitOnly { get; init; }
+    InArray<double> InInitOnly { init { } }
 }";
         await new CSharpVerifier<ILN0002_NoInOutRetInBodyAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
     }
