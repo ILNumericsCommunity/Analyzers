@@ -51,6 +51,10 @@ dotnet add package ILNumerics.Community.Analyzers
 
   ILNumerics fields require manual lifetime management via `localMember<T>()`, `localCell()`, or `localLogical()`, which is incompatible with record semantics such as value equality and synthesized copy constructors. `ILN0008` flags any `Array<T>`, `Cell`, or `Logical` field declared in a `record` or `record struct` and reports an error. Use a regular `class` instead when ILNumerics array fields are needed.
 
+- **ILN0009 — Avoid compound operators on ILNumerics arrays**
+
+  Compound operators (`+=`, `-=`, `*=`, etc.) on ILNumerics arrays should be rewritten to expanded form. With an indexer (`A[idx] += expr`) this is an **error**: C# evaluates the indexer twice but ILNumerics index arguments are disposed after the first evaluation, causing exceptions or incorrect results. The expanded form `A[idx] = A[idx] + expr` is perfectly valid. Without an indexer the diagnostic is a **warning**. The code fix rewrites both cases automatically.
+
 ### Troubleshooting
 
 No squiggles but lightbulb available: enable live analysis in the IDE (VS: Tools → Options → Text Editor → C# → Advanced → Enable .NET analyzers, Full solution analysis) and ensure `.editorconfig` does not suppress diagnostics.

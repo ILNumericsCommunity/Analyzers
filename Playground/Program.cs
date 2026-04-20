@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using ILNumerics;
+using static ILNumerics.Globals;
 using static ILNumerics.ILMath;
 
 namespace Playground;
@@ -29,6 +30,18 @@ internal static class Program
         // ILN0006: Use GetValue (and SetValue) for scalar access
         Array<double> f = zeros<double>(3, 4);
         double fv = (double) f[1, 2];
+
+        // ILN0007: Use isnull() for null checks on arrays
+        Array<double> g = zeros<double>(3, 4);
+        if (g == null)
+        {
+            // Do something
+            return;
+        }
+
+        // ILN0009: No compound operators (+=, -=, etc.) with ILNumerics arrays
+        Array<double> h = zeros<double>(5, 4);
+        h[r(1, 3), full] *= 5;
     }
 
     // ILN0001: No 'var' for ILNumerics arrays
