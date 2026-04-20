@@ -42,8 +42,7 @@ public sealed class ILN0009_NoCompoundOperatorOnArrayFix : CodeFixProvider
 
         // Build: target = target op right
         var binaryExpr = SyntaxFactory.BinaryExpression(binaryKind, assignment.Left.WithoutTrivia(), assignment.Right.WithoutTrivia());
-        var newAssignment = SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, assignment.Left.WithoutTrivia(),
-                                                               SyntaxFactory.ParenthesizedExpression(binaryExpr)).WithTriviaFrom(assignment);
+        var newAssignment = SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, assignment.Left.WithoutTrivia(), binaryExpr).WithTriviaFrom(assignment);
 
         var newRoot = root!.ReplaceNode(assignment, newAssignment);
         return doc.WithSyntaxRoot(newRoot);

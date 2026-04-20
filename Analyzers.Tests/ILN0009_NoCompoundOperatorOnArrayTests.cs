@@ -87,7 +87,7 @@ using ILNumerics;
 
 class C {
     void M(Array<double> A) {
-        A = (A + 2);
+        A = A + 2;
     }
 }";
         var t = CreateTest(test, fix);
@@ -113,7 +113,7 @@ using ILNumerics;
 
 class C {
     void M(Array<double> A) {
-        A[0] = (A[0] + 2);
+        A[0] = A[0] + 2;
     }
 }";
         var t = CreateTest(test, fix);
