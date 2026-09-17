@@ -96,4 +96,80 @@ public sealed class ClassWithArrayField {
 
         await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, ILN0005_LocalMemberForFieldsFix>.Test { TestCode = test }.RunAsync();
     }
+
+    [Fact]
+    public async Task Flags_Named_ValueTuple_Slot_Rebinding_As_ILN0005B()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class C
+{
+    public void M(InArray<double> x)
+    {
+        (Array<double> a, Array<double> b) t = (zeros<double>(2, 2), ones<double>(2, 2));
+        {|ILN0005B:t.a|} = check(x);
+    }
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
+    }
+
+    [Fact]
+    public async Task Flags_Unnamed_ValueTuple_Item_Rebinding_As_ILN0005B()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class C
+{
+    public void M(InArray<double> x)
+    {
+        (Array<double>, Array<double>) t = (zeros<double>(2, 2), ones<double>(2, 2));
+        {|ILN0005B:t.Item1|} = check(x);
+    }
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
+    }
+
+    [Fact]
+    public async Task Flags_Tuple_Typed_Class_Field_As_ILN0005B()
+    {
+        var test = @"
+using ILNumerics;
+
+public sealed class C
+{
+    private (Array<double> a, Array<double> b) {|ILN0005B:_state|};
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
+    }
+
+    [Fact]
+    public async Task Does_Not_Flag_DotA_Or_Assign_On_ValueTuple_Slot()
+    {
+        var test = @"
+using ILNumerics;
+using static ILNumerics.ILMath;
+
+public sealed class C
+{
+    public void M(InArray<double> x)
+    {
+        (Array<double> a, Array<double> b) t = (zeros<double>(2, 2), ones<double>(2, 2));
+        t.a.a = check(x);
+        t.a.Assign(check(x));
+    }
+}
+";
+
+        await new CSharpVerifier<ILN0005_LocalMemberForFieldsAnalyzer, EmptyCodeFixProvider>.Test { TestCode = test }.RunAsync();
+    }
 }

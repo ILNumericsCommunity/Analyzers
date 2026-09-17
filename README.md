@@ -37,7 +37,7 @@ dotnet add package ILNumerics.Community.Analyzers
 
 - **ILN0005 — ILNumerics fields should use `localMember<T>()` and safe assignment**
 
-  Instance fields of ILNumerics `Array<T>` types are treated as local members: they should be initialized via `localMember<T>()`. `ILN0005` flags non‑static `Array<T>` fields that either have no initializer or use something other than `localMember<T>()`. Valid writes to fields must use either `_A.a = ...` or `_A.Assign(...)`, which keeps the field buffer stable following expected lifetime conventions.
+  Instance fields of ILNumerics `Array<T>` types are treated as local members: they should be initialized via `localMember<T>()`. `ILN0005` flags non‑static `Array<T>` fields that either have no initializer or use something other than `localMember<T>()`. `ILN0005A` flags direct writes to **class fields** (`_A = ...`); valid writes must use `_A.a = ...` or `_A.Assign(...)`, which keeps the field buffer stable following expected lifetime conventions. `ILN0005B` warns that **ValueTuple** elements cannot host ILNumerics arrays with `localMember<T>()` / `.a` — use a class field instead of rebinding tuple slots such as `t.a = ...` or `t.Item1 = ...`.
 
 - **ILN0006 — Use `GetValue()`/`SetValue()` for scalar element access**
 

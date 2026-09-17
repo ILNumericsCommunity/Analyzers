@@ -9,8 +9,8 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0006_GetValueForScalarAccessAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0006", "Use GetValue()/SetValue() for scalar element access", "Use '{0}.GetValue(...)' for scalar element access",
-                                                           "ILNumerics", DiagnosticSeverity.Warning, true);
+    public static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor("ILN0006", "Use GetValue()/SetValue() for scalar element access",
+                                                                                "Use '{0}.GetValue(...)' for scalar element access", "ILNumerics", DiagnosticSeverity.Warning, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 

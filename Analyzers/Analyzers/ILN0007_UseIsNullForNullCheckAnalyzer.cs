@@ -9,9 +9,10 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0007_UseIsNullForNullCheckAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0007", "Use isnull() for null checks on ILNumerics arrays",
-                                                           "Use 'isnull({0})' instead of '{0} {1} null' for ILNumerics arrays", "ILNumerics", DiagnosticSeverity.Warning, true,
-                                                           "ILNumerics arrays should use ILMath.isnull() for null checks instead of == null or != null.");
+    public static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor("ILN0007", "Use isnull() for null checks on ILNumerics arrays",
+                                                                                "Use 'isnull({0})' instead of '{0} {1} null' for ILNumerics arrays", "ILNumerics",
+                                                                                DiagnosticSeverity.Warning, true,
+                                                                                "ILNumerics arrays should use ILMath.isnull() for null checks instead of == null or != null.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 

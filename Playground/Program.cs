@@ -27,6 +27,10 @@ internal static class Program
         var fieldClass = new ClassWithArrayFields(zeros<double>(2, 2));
         fieldClass.Update(zeros<double>(2, 1));
 
+        // ILN0005B: ValueTuple slots cannot host ILNumerics arrays
+        ILN0005B_ValueTupleSlots(zeros<double>(2, 2));
+        var tupleHost = new ClassWithTupleArrayField(zeros<double>(2, 2));
+
         // ILN0006: Use GetValue (and SetValue) for scalar access
         Array<double> f = zeros<double>(3, 4);
         double fv = (double) f[1, 2];
@@ -78,6 +82,14 @@ internal static class Program
     {
         outA = zeros<double>(3, 4);
     }
+
+    // ILN0005B: ValueTuple slots cannot host ILNumerics arrays
+    private static void ILN0005B_ValueTupleSlots(InArray<double> x)
+    {
+        (Array<double> a, Array<double> b) t = (zeros<double>(2, 2), ones<double>(2, 2));
+        t.a = check(x);
+        t.b = check(x);
+    }
 }
 
 // ILN0005: Enforce localMember<T>() initialization for fields
@@ -97,5 +109,17 @@ internal class ClassWithArrayFields
     {
         _fieldA = x;
         _fieldB = x;
+    }
+}
+
+// ILN0005B: ValueTuple fields/slots cannot host ILNumerics arrays
+internal class ClassWithTupleArrayField
+{
+    private (Array<double> a, Array<double> b) _state;
+
+    public ClassWithTupleArrayField(InArray<double> x)
+    {
+        _state.a = check(x);
+        _state.b = ones<double>(2, 2);
     }
 }

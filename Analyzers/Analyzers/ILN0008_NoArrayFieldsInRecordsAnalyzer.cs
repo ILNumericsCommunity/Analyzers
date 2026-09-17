@@ -7,10 +7,10 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0008_NoArrayFieldsInRecordsAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0008", "ILNumerics Array/Cell/Logicalal fields must not be used in records",
-                                                           "Field '{0}' of type '{1}' must not be declared in a record; use a class instead", "ILNumerics",
-                                                           DiagnosticSeverity.Error, true,
-                                                           "ILNumerics Array, Cell and Logical fields require manual lifetime management via localMember/localCell/localLogical() which is incompatible with record semantics.");
+    public static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor("ILN0008", "ILNumerics Array/Cell/Logicalal fields must not be used in records",
+                                                                                "Field '{0}' of type '{1}' must not be declared in a record; use a class instead", "ILNumerics",
+                                                                                DiagnosticSeverity.Error, true,
+                                                                                "ILNumerics Array, Cell and Logical fields require manual lifetime management via localMember/localCell/localLogical() which is incompatible with record semantics.");
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 

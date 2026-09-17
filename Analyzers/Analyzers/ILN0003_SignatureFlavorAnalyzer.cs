@@ -7,12 +7,13 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0003_SignatureFlavorAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor ParamRule = new("ILN0003", "Prefer InArray/OutArray in public signatures",
-                                                                "Parameter '{0}' uses '{1}', consider '{2}' for ILNumerics APIs", "ILNumerics", DiagnosticSeverity.Info, true);
+    public static readonly DiagnosticDescriptor ParamRule = new DiagnosticDescriptor("ILN0003", "Prefer InArray/OutArray in public signatures",
+                                                                                     "Parameter '{0}' uses '{1}', consider '{2}' for ILNumerics APIs", "ILNumerics",
+                                                                                     DiagnosticSeverity.Info, true);
 
-    public static readonly DiagnosticDescriptor ReturnRule = new("ILN0003R", "Prefer RetArray return type",
-                                                                 "Method returns '{0}', consider returning 'RetArray<>' for ILNumerics APIs", "ILNumerics", DiagnosticSeverity.Info,
-                                                                 true);
+    public static readonly DiagnosticDescriptor ReturnRule = new DiagnosticDescriptor("ILN0003R", "Prefer RetArray return type",
+                                                                                      "Method returns '{0}', consider returning 'RetArray<>' for ILNumerics APIs", "ILNumerics",
+                                                                                      DiagnosticSeverity.Info, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [ParamRule, ReturnRule];
 

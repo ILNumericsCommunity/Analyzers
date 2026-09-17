@@ -7,8 +7,9 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0004_NoRefOutWithArraysAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0004", "Avoid 'out/ref' with IL arrays", "Parameter '{0}' uses '{1}' (prefer 'OutArray<>' and remove 'out/ref')",
-                                                           "ILNumerics", DiagnosticSeverity.Warning, true);
+    public static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor("ILN0004", "Avoid 'out/ref' with IL arrays",
+                                                                                "Parameter '{0}' uses '{1}' (prefer 'OutArray<>' and remove 'out/ref')", "ILNumerics",
+                                                                                DiagnosticSeverity.Warning, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 

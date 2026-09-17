@@ -10,14 +10,19 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor AssignRule = new("ILN0005A", "ILNumerics fields should be assigned via '.a' or Assign()",
-                                                                 "Field '{0}' should be assigned via '{0}.a = ...' or '{0}.Assign(...)'", "ILNumerics", DiagnosticSeverity.Warning,
-                                                                 true);
+    public static readonly DiagnosticDescriptor AssignRule = new DiagnosticDescriptor("ILN0005A", "ILNumerics fields should be assigned via '.a' or Assign()",
+                                                                                      "Field '{0}' should be assigned via '{0}.a = ...' or '{0}.Assign(...)'", "ILNumerics",
+                                                                                      DiagnosticSeverity.Warning, true);
 
-    public static readonly DiagnosticDescriptor Rule = new("ILN0005", "ILNumerics fields should use localMember<T>() pattern",
-                                                           "Field '{0}' of type '{1}' should be initialized via localMember<T>()", "ILNumerics", DiagnosticSeverity.Info, true);
+    public static readonly DiagnosticDescriptor TupleSlotRule = new DiagnosticDescriptor("ILN0005B", "ValueTuple slots cannot host ILNumerics arrays",
+                                                                                         "'{0}' is a ValueTuple element of type '{1}'; ILNumerics arrays cannot be hosted in tuple slots. Use a class field initialized with localMember<T>() instead of rebinding the tuple element",
+                                                                                         "ILNumerics", DiagnosticSeverity.Warning, true);
 
-    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule, AssignRule];
+    public static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor("ILN0005", "ILNumerics fields should use localMember<T>() pattern",
+                                                                                "Field '{0}' of type '{1}' should be initialized via localMember<T>()", "ILNumerics",
+                                                                                DiagnosticSeverity.Info, true);
+
+    public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule, AssignRule, TupleSlotRule];
 
     public override void Initialize(AnalysisContext context)
     {
@@ -37,11 +42,23 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
         if (ctx.Symbol is not IFieldSymbol field)
             return;
 
-        if (field.Type is not INamedTypeSymbol t || !ILNTypes.IsArray(t))
-            return;
-
         // Only care about instance fields
         if (field.IsStatic)
+            return;
+
+        // Compiler-generated ValueTuple fields are not localMember candidates
+        if (field.ContainingType is { IsTupleType: true })
+            return;
+
+        if (field.Type is INamedTypeSymbol fieldType && IsTupleWithIlnArrayElement(fieldType))
+        {
+            var location = field.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax(ctx.CancellationToken).GetLocation() ?? field.Locations[0];
+            ctx.ReportDiagnostic(Diagnostic.Create(TupleSlotRule, location, field.Name, fieldType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+
+            return;
+        }
+
+        if (field.Type is not INamedTypeSymbol t || !ILNTypes.IsArray(t))
             return;
 
         // If field has an initializer, ensure it's localMember<>()
@@ -81,7 +98,17 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
 
         // If assignment goes directly to the field, flag it
         if (target is IFieldReferenceOperation fieldRef && IsIlnArrayField(fieldRef.Field))
+        {
+            if (fieldRef.Field.ContainingType is { IsTupleType: true })
+            {
+                ctx.ReportDiagnostic(Diagnostic.Create(TupleSlotRule, target.Syntax.GetLocation(), fieldRef.Field.Name,
+                                                       fieldRef.Field.Type.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+
+                return;
+            }
+
             ctx.ReportDiagnostic(Diagnostic.Create(AssignRule, target.Syntax.GetLocation(), fieldRef.Field.Name));
+        }
     }
 
     private static void AnalyzeInvocation(OperationAnalysisContext ctx)
@@ -93,4 +120,7 @@ public sealed class ILN0005_LocalMemberForFieldsAnalyzer : DiagnosticAnalyzer
     }
 
     private static bool IsIlnArrayField(IFieldSymbol field) => !field.IsStatic && field.Type is INamedTypeSymbol t && ILNTypes.IsArray(t);
+
+    private static bool IsTupleWithIlnArrayElement(INamedTypeSymbol type)
+        => type.IsTupleType && type.TupleElements.Any(e => e.Type is INamedTypeSymbol elementType && ILNTypes.IsArray(elementType));
 }

@@ -10,9 +10,9 @@ namespace ILNumerics.Community.Analyzers.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class ILN0002_NoInOutRetInBodyAnalyzer : DiagnosticAnalyzer
 {
-    public static readonly DiagnosticDescriptor Rule = new("ILN0002", "Only In/Out/Ret in method signatures",
-                                                           "Type '{0}' should only appear in method signatures (not in locals/fields/properties)", "ILNumerics",
-                                                           DiagnosticSeverity.Warning, true);
+    public static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor("ILN0002", "Only In/Out/Ret in method signatures",
+                                                                                "Type '{0}' should only appear in method signatures (not in locals/fields/properties)",
+                                                                                "ILNumerics", DiagnosticSeverity.Warning, true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => [Rule];
 
