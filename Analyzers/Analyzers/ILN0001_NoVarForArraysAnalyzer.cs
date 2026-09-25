@@ -40,14 +40,8 @@ public sealed class ILN0001_NoVarForArraysAnalyzer : DiagnosticAnalyzer
                     var id = decleration?.Type as IdentifierNameSyntax;
                     var isVar = id is not null && id.Identifier.Text == "var" && id.IsVar;
 
-                    // Try to infer the concrete ILNumerics type from the initializer or the symbol type
-                    INamedTypeSymbol? ilnType = null;
-                    if (v.Initializer is IVariableInitializerOperation init && init.Value?.Type is INamedTypeSymbol rhsType)
-                        ilnType = rhsType;
-                    else if (ls.Type is INamedTypeSymbol symType)
-                        ilnType = symType;
-
-                    if (isVar && ilnType is not null && ILNTypes.IsAnyIln(ilnType))
+                    // Check the inferred local type, not the initializer's intermediate type.
+                    if (isVar && ls.Type is INamedTypeSymbol ilnType && ILNTypes.IsAnyIln(ilnType))
                     {
                         var preferredName = ILNTypes.GetPreferredLocalTypeName(ilnType);
 
